@@ -39,8 +39,14 @@ export const period = writable(DATE_PERIOD_ARR[0])
 
 export const legend = writable({ chartContext: {}, seriesIndex: -1 })
 
-// Total asset value in the target currency
+// Total asset value (positive amounts only) in the target currency
 export const totalAssetValue = writable(0)
+
+// Total liability value (absolute sum of negative amounts) in the target currency
+export const totalLiabilityValue = writable(0)
+
+// Net worth (positive amounts + negative amounts) in the target currency
+export const netWorthValue = writable(0)
 
 /* 基于如下 store 来获取实时汇率数据 & 计算汇率 */
 export const exchangeRates = writable({})

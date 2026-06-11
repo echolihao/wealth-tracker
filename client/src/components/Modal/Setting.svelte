@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte'
+  import dayjs from 'dayjs'
   import { Modal } from 'flowbite'
   import { _ } from 'svelte-i18n'
   import SvgIcon from '../SvgIcon.svelte'
@@ -7,9 +8,9 @@
   import { EXCHANGE_RATE_API_KEY, BITCOIN_API_KEY } from './../../helper/constant'
   import { fetchExchangeRates } from './../../helper/utils'
   import { hashPassword } from './../../helper/auth'
-  import { setPassword } from './../../helper/apis'
+  import { setPassword, exportBackup, importBackup } from './../../helper/apis'
   import { loadUserSettings, saveUserSettings } from './../../helper/settings'
-  import { alert, isPasswordAllowed, isResettable } from './../../stores'
+  import { alert, notice, isPasswordAllowed, isResettable } from './../../stores'
   import type { ModalOptions } from 'flowbite'
 
   const dispatch = createEventDispatcher()
@@ -22,9 +23,121 @@
   let password: string = ''
   let confirmPassword: string = ''
   let activeTab: string = 'general'
+  let isExporting: boolean = false
+  let isImporting: boolean = false
+  let importFileInput: HTMLInputElement
 
   const setTab = (tab: string) => {
     activeTab = tab
+  }
+
+  const downloadFile = (content: string, filename: string, mime: string) => {
+    const blob = new Blob([content], { type: mime })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleExportJson = async () => {
+    try {
+      isExporting = true
+      const backup = await exportBackup()
+      downloadFile(
+        JSON.stringify(backup, null, 2),
+        `wealth-tracker-backup-${dayjs().format('YYYY-MM-DD')}.json`,
+        'application/json',
+      )
+      notice.set($_('backup.exportSuccess'))
+    } catch (err) {
+      alert.set(err.message || $_('backup.exportFailed'))
+    } finally {
+      isExporting = false
+    }
+  }
+
+  const escapeCsvCell = (value: unknown): string => {
+    const text = value === null || value === undefined ? '' : String(value)
+    if (/[",\n\r]/.test(text)) {
+      return `"${text.replace(/"/g, '""')}"`
+    }
+    return text
+  }
+
+  const handleExportCsv = async () => {
+    try {
+      isExporting = true
+      const backup: any = await exportBackup()
+      const records = backup?.data?.records || []
+      const columns = [
+        'type',
+        'alias',
+        'amount',
+        'currency',
+        'risk',
+        'liquidity',
+        'tags',
+        'datetime',
+        'note',
+        'created',
+      ]
+      const lines = [
+        columns.join(','),
+        ...records.map((item) => columns.map((key) => escapeCsvCell(item[key])).join(',')),
+      ]
+      // BOM keeps non-ASCII content readable when the CSV is opened in Excel.
+      downloadFile(
+        '\ufeff' + lines.join('\n'),
+        `wealth-tracker-records-${dayjs().format('YYYY-MM-DD')}.csv`,
+        'text/csv;charset=utf-8',
+      )
+      notice.set($_('backup.exportSuccess'))
+    } catch (err) {
+      alert.set(err.message || $_('backup.exportFailed'))
+    } finally {
+      isExporting = false
+    }
+  }
+
+  const handleImportClick = () => {
+    importFileInput?.click()
+  }
+
+  const handleImportFile = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    try {
+      isImporting = true
+      const text = await file.text()
+      let payload
+      try {
+        payload = JSON.parse(text)
+      } catch {
+        alert.set($_('backup.importInvalid'))
+        return
+      }
+      const result: any = await importBackup(payload)
+      const counts = result?.counts || {}
+      notice.set(
+        $_('backup.importSuccess', {
+          values: {
+            assets: counts.assets || 0,
+            records: counts.records || 0,
+            insights: counts.insights || 0,
+            goals: counts.goals || 0,
+          },
+        }),
+      )
+      // Reload so every widget reflects the merged dataset.
+      setTimeout(() => window.location.reload(), 1600)
+    } catch (err) {
+      alert.set(err.message || $_('backup.importInvalid'))
+    } finally {
+      isImporting = false
+      event.target.value = ''
+    }
   }
 
   $: if (error) {
@@ -183,6 +296,17 @@
                 {$_('settingTabs.currencies')}
               </button>
             </li>
+            <li class="me-2">
+              <button
+                type="button"
+                on:click={() => setTab('data')}
+                class="inline-block rounded-t-lg border-b-2 p-4 {activeTab === 'data'
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-600'}"
+                role="tab">
+                {$_('settingTabs.data')}
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -307,6 +431,53 @@
           </div>
         {:else if activeTab === 'currencies'}
           <CustomCurrencyManager />
+        {:else if activeTab === 'data'}
+          <div class="flex flex-col space-y-6">
+            <div>
+              <h4 class="mb-1 text-base font-medium text-gray-900">
+                {$_('backup.exportTitle')}
+              </h4>
+              <p class="text-grey mb-4 text-sm">{$_('backup.exportDesc')}</p>
+              <div class="flex flex-wrap gap-4">
+                <button
+                  type="button"
+                  class="regular-btn"
+                  disabled={isExporting}
+                  on:click={handleExportJson}>
+                  {$_('backup.exportJson')}
+                </button>
+                <button
+                  type="button"
+                  class="regular-btn"
+                  disabled={isExporting}
+                  on:click={handleExportCsv}>
+                  {$_('backup.exportCsv')}
+                </button>
+              </div>
+            </div>
+
+            <hr class="h-px w-full border-0 bg-gray-200" />
+
+            <div>
+              <h4 class="mb-1 text-base font-medium text-gray-900">
+                {$_('backup.importTitle')}
+              </h4>
+              <p class="text-warn mb-4 text-sm">{$_('backup.importTip')}</p>
+              <button
+                type="button"
+                class="regular-btn"
+                disabled={isImporting}
+                on:click={handleImportClick}>
+                {isImporting ? $_('backup.importing') : $_('backup.importData')}
+              </button>
+              <input
+                type="file"
+                accept=".json,application/json"
+                class="hidden"
+                bind:this={importFileInput}
+                on:change={handleImportFile} />
+            </div>
+          </div>
         {/if}
       </div>
     </div>

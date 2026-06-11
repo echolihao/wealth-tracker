@@ -7,6 +7,8 @@
   import Header from '../components/Header.svelte'
   import Footer from '../components/Footer.svelte'
   import OperatingArea from '../components/OperatingArea.svelte'
+  import WealthSummary from '../components/WealthSummary.svelte'
+  import GoalPanel from '../components/GoalPanel.svelte'
   import TableWidget from '../components/ChartWidget/TableWidget.svelte'
   import AreaChart from '../components/ChartWidget/AreaChart.svelte'
   import DonutChart from '../components/ChartWidget/DonutChart.svelte'
@@ -48,6 +50,9 @@
       amount: convertCurrency(item.amount, item.currency, $targetCurrencyCode, $exchangeRates),
     }))
   }
+
+  // 资产配置图仅统计正数金额账户
+  $: donutSources = convertedAssetsArr.filter((item) => Number(item.amount) >= 0)
 
   onMount(async () => {
     updatePageMetaInfo({})
@@ -181,6 +186,7 @@
 
 <div class="flex w-full flex-col items-center justify-center space-y-8">
   <OperatingArea on:add={handleAdd} />
+  <WealthSummary />
   <TableWidget
     options={rawAssetsArr}
     on:update={handleUpate}
@@ -190,8 +196,14 @@
     <Skeleton type="all" />
   {/if}
 
+  {#if isShowChart}
+    <GoalPanel records={convertedRecordsArr}></GoalPanel>
+  {/if}
+
   {#if isShowChart && convertedAssetsArr.length}
-    <DonutChart sources={convertedAssetsArr}></DonutChart>
+    {#if donutSources.length}
+      <DonutChart sources={donutSources}></DonutChart>
+    {/if}
     <AreaChart sources={convertedRecordsArr}></AreaChart>
     <BindingChart sources={convertedRecordsArr}></BindingChart>
   {/if}

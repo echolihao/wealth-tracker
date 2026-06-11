@@ -5,7 +5,8 @@
   "setting": "设置",
   "settingTabs": {
     "general": "通用设置",
-    "currencies": "自定义货币"
+    "currencies": "自定义货币",
+    "data": "数据管理"
   },
   "update": "更新",
   "reset": "重置",
@@ -23,6 +24,7 @@
   "amount": "金额",
   "risk": "风险",
   "liquidity": "流动性",
+  "liability": "负债",
   "allowReset": "允许重置",
   "allowPassword": "允许密码",
   "setPassword": "设置密码",
@@ -47,6 +49,8 @@
   "all": "全部",
   "total": "总计",
   "totalAssets": "总资产",
+  "totalLiabilities": "总负债",
+  "netWorth": "净资产",
   "distribution": "分布",
   "assetAllocation": "资产配置",
   "currentAssetStatus": "当前资产状况",
@@ -142,6 +146,40 @@
       "title": "暂无自定义货币",
       "tip": "点击\"添加货币\"按钮添加自定义货币"
     }
+  },
+  "backup": {
+    "exportTitle": "导出数据",
+    "exportDesc": "将资产、历史记录、见解与目标导出为文件，妥善保存以备迁移或恢复。",
+    "exportJson": "导出备份 (JSON)",
+    "exportCsv": "导出明细 (CSV)",
+    "exportSuccess": "导出成功",
+    "exportFailed": "导出失败，请重试",
+    "importTitle": "导入数据",
+    "importTip": "导入会将备份与现有数据合并：同名账户将被覆盖，历史记录自动去重。",
+    "importData": "选择备份文件导入",
+    "importing": "导入中...",
+    "importInvalid": "无效的备份文件，请选择本应用导出的 JSON 备份",
+    "importSuccess": "导入成功：账户 {assets} 个、记录 {records} 条、见解 {insights} 条、目标 {goals} 个"
+  },
+  "goal": {
+    "title": "财务目标",
+    "subtitle": "设定目标净资产，追踪达成进度",
+    "addGoal": "添加目标",
+    "editGoal": "编辑目标",
+    "name": "目标名称",
+    "namePlaceholder": "例如：第一个 100 万",
+    "targetAmount": "目标金额",
+    "amountPlaceholder": "请填写目标金额",
+    "deadline": "期限",
+    "deadlinePlaceholder": "可选，格式 YYYY-MM-DD",
+    "forecastDate": "预计达成",
+    "noForecast": "暂无法预测",
+    "achieved": "已达成",
+    "emptyTip": "暂无财务目标，点击「添加目标」设定你的第一个里程碑",
+    "deleteConfirmation": "您确定要删除此目标吗？",
+    "nameRequiredTip": "请填写目标名称",
+    "amountRequiredTip": "请填写大于 0 的目标金额",
+    "saveFailed": "保存失败，请重试"
   },
   "currencys": {
     "CNY": "人民币",

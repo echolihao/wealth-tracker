@@ -54,6 +54,14 @@ export const DEFAULT_ACCOUNT_ITEM = {
   note: '',
 }
 
+export const DEFAULT_GOAL_ITEM = {
+  id: 0,
+  name: '',
+  amount: null,
+  currency: 'CNY',
+  deadline: '',
+}
+
 export const SOCIAL_LINKS = [
   {
     href: 'https://share.lovejade.cn',

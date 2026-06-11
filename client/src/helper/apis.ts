@@ -64,6 +64,30 @@ export const getInsightsCalendarData = (data) => {
   return $ajax.get(genApiPath('insights/calendar'), data)
 }
 
+export const createGoal = (data) => {
+  return $ajax.post(genApiPath('goals'), data)
+}
+
+export const getGoals = () => {
+  return $ajax.get(genApiPath('goals'), {})
+}
+
+export const updateGoal = (data) => {
+  return $ajax.put(genApiPath('goals'), data)
+}
+
+export const destroyGoal = (data) => {
+  return $ajax.delete(genApiPath('goals'), data)
+}
+
+export const exportBackup = () => {
+  return $ajax.get(genApiPath('backup/export'), {})
+}
+
+export const importBackup = (data) => {
+  return $ajax.post(genApiPath('backup/import'), data)
+}
+
 export const resetDatabase = () => {
   return $ajax.post(genApiPath('reset'), {})
 }

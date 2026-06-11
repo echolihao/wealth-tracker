@@ -23,6 +23,17 @@ export interface AssetsItem {
   tags?: string
 }
 
+export interface GoalItem {
+  id: number
+  name: string
+  amount: number
+  currency: string
+  deadline?: string
+  achievedAt?: string
+  created?: string
+  updated?: string
+}
+
 export interface Settings {
   [key: string]: string | number
 }

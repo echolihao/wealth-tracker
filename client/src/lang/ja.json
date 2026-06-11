@@ -5,7 +5,8 @@
   "setting": "設定",
   "settingTabs": {
     "general": "全般設定",
-    "currencies": "カスタム通貨"
+    "currencies": "カスタム通貨",
+    "data": "データ管理"
   },
   "update": "更新",
   "reset": "リセット",
@@ -23,6 +24,7 @@
   "amount": "金額",
   "risk": "リスク",
   "liquidity": "流動性",
+  "liability": "負債",
   "allowReset": "リセットを許可",
   "allowPassword": "パスワードを許可",
   "setPasswordTip": "警告 ⚠️：パスワードを失うと = データは永遠に失われます",
@@ -47,6 +49,8 @@
   "all": "すべて",
   "total": "合計",
   "totalAssets": "総資産",
+  "totalLiabilities": "総負債",
+  "netWorth": "純資産",
   "distribution": "分布",
   "assetAllocation": "資産配分",
   "currentAssetStatus": "現在の資産状況",
@@ -142,6 +146,40 @@
       "title": "カスタム通貨がありません",
       "tip": "「通貨を追加」をクリックしてカスタム通貨を作成してください"
     }
+  },
+  "backup": {
+    "exportTitle": "データのエクスポート",
+    "exportDesc": "資産、履歴、インサイト、目標をファイルにエクスポートし、移行や復元に備えて保管してください。",
+    "exportJson": "バックアップをエクスポート (JSON)",
+    "exportCsv": "履歴をエクスポート (CSV)",
+    "exportSuccess": "エクスポートに成功しました",
+    "exportFailed": "エクスポートに失敗しました。再試行してください",
+    "importTitle": "データのインポート",
+    "importTip": "インポートはバックアップを既存データに統合します：同じ ID のアカウントは上書きされ、履歴は自動的に重複排除されます。",
+    "importData": "バックアップファイルを選択",
+    "importing": "インポート中...",
+    "importInvalid": "無効なバックアップファイルです。本アプリでエクスポートした JSON バックアップを選択してください。",
+    "importSuccess": "インポート完了：アカウント {assets} 件、履歴 {records} 件、インサイト {insights} 件、目標 {goals} 件"
+  },
+  "goal": {
+    "title": "財務目標",
+    "subtitle": "目標純資産を設定し、達成状況を追跡します",
+    "addGoal": "目標を追加",
+    "editGoal": "目標を編集",
+    "name": "目標名",
+    "namePlaceholder": "例：最初の 1,000 万円",
+    "targetAmount": "目標金額",
+    "amountPlaceholder": "目標金額を入力してください",
+    "deadline": "期限",
+    "deadlinePlaceholder": "任意、形式 YYYY-MM-DD",
+    "forecastDate": "達成予測日",
+    "noForecast": "予測できません",
+    "achieved": "達成済み",
+    "emptyTip": "目標がまだありません。「目標を追加」をクリックして最初のマイルストーンを設定しましょう。",
+    "deleteConfirmation": "この目標を削除してもよろしいですか？",
+    "nameRequiredTip": "目標名を入力してください",
+    "amountRequiredTip": "0 より大きい目標金額を入力してください",
+    "saveFailed": "保存に失敗しました。再試行してください"
   },
   "currencys": {
     "CNY": "中国人民元",

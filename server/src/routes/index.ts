@@ -3,6 +3,8 @@ import assets from './assets'
 import records from './records'
 import advice from './advice'
 import insights from './insights'
+import goals from './goals'
+import backup from './backup'
 import password from './password'
 import userSettings from './userSettings'
 import customCurrency from './customCurrency'
@@ -54,6 +56,8 @@ export default [
   ...records,
   ...advice,
   ...insights,
+  ...goals,
+  ...backup,
   ...password,
   ...userSettings,
   ...customCurrency,

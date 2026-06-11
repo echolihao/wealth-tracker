@@ -5,7 +5,8 @@
   "setting": "Paramètres",
   "settingTabs": {
     "general": "Paramètres généraux",
-    "currencies": "Devises personnalisées"
+    "currencies": "Devises personnalisées",
+    "data": "Données"
   },
   "update": "Mettre à jour",
   "reset": "Réinitialiser",
@@ -23,6 +24,7 @@
   "amount": "Montant",
   "risk": "Risque",
   "liquidity": "Liquidité",
+  "liability": "Passif",
   "allowReset": "Autoriser la réinitialisation",
   "allowPassword": "Autoriser le mot de passe",
   "setPasswordTip": "Attention ⚠️: Mot de passe perdu = Données perdues à jamais",
@@ -47,6 +49,8 @@
   "all": "Tous",
   "total": "Total",
   "totalAssets": "Total des Actifs",
+  "totalLiabilities": "Total des Passifs",
+  "netWorth": "Valeur Nette",
   "distribution": "Distribution",
   "assetAllocation": "Allocation d'actifs",
   "currentAssetStatus": "État actuel des actifs",
@@ -142,6 +146,40 @@
       "title": "Aucune devise personnalisée pour le moment",
       "tip": "Cliquez sur « Ajouter une devise » pour créer une devise personnalisée"
     }
+  },
+  "backup": {
+    "exportTitle": "Exporter les données",
+    "exportDesc": "Exportez les actifs, l'historique, les réflexions et les objectifs dans un fichier pour la migration ou la restauration.",
+    "exportJson": "Exporter la sauvegarde (JSON)",
+    "exportCsv": "Exporter l'historique (CSV)",
+    "exportSuccess": "Exportation réussie",
+    "exportFailed": "Échec de l'exportation, veuillez réessayer",
+    "importTitle": "Importer les données",
+    "importTip": "L'importation fusionne la sauvegarde avec les données existantes : les comptes portant le même identifiant sont remplacés, l'historique est dédupliqué.",
+    "importData": "Choisir un fichier de sauvegarde",
+    "importing": "Importation...",
+    "importInvalid": "Fichier de sauvegarde invalide. Veuillez sélectionner une sauvegarde JSON exportée par cette application.",
+    "importSuccess": "Importé : {assets} comptes, {records} enregistrements, {insights} réflexions, {goals} objectifs"
+  },
+  "goal": {
+    "title": "Objectifs financiers",
+    "subtitle": "Définissez une valeur nette cible et suivez vos progrès",
+    "addGoal": "Ajouter un objectif",
+    "editGoal": "Modifier l'objectif",
+    "name": "Nom de l'objectif",
+    "namePlaceholder": "ex. Premier million",
+    "targetAmount": "Montant cible",
+    "amountPlaceholder": "Saisissez le montant cible",
+    "deadline": "Échéance",
+    "deadlinePlaceholder": "Facultatif, format YYYY-MM-DD",
+    "forecastDate": "Atteinte estimée",
+    "noForecast": "Pas encore prévisible",
+    "achieved": "Atteint",
+    "emptyTip": "Aucun objectif pour l'instant. Cliquez sur « Ajouter un objectif » pour définir votre premier jalon.",
+    "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cet objectif ?",
+    "nameRequiredTip": "Veuillez saisir un nom d'objectif",
+    "amountRequiredTip": "Veuillez saisir un montant cible supérieur à 0",
+    "saveFailed": "Échec de l'enregistrement, veuillez réessayer"
   },
   "currencys": {
     "CNY": "Yuan Chinois",

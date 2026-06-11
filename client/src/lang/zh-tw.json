@@ -5,7 +5,8 @@
   "setting": "設定",
   "settingTabs": {
     "general": "通用設定",
-    "currencies": "自訂貨幣"
+    "currencies": "自訂貨幣",
+    "data": "資料管理"
   },
   "update": "更新",
   "reset": "重設",
@@ -23,6 +24,7 @@
   "amount": "金額",
   "risk": "風險",
   "liquidity": "流動性",
+  "liability": "負債",
   "allowReset": "允許重置",
   "allowPassword": "允許密碼",
   "setPasswordTip": "警告 ⚠️：密碼遺失 = 資料永別",
@@ -47,6 +49,8 @@
   "all": "全部",
   "total": "總計",
   "totalAssets": "總資產",
+  "totalLiabilities": "總負債",
+  "netWorth": "淨資產",
   "distribution": "分佈",
   "assetAllocation": "資產配置",
   "currentAssetStatus": "當前資產狀況",
@@ -142,6 +146,40 @@
       "title": "暫無自訂貨幣",
       "tip": "點擊「新增貨幣」按鈕新增自訂貨幣"
     }
+  },
+  "backup": {
+    "exportTitle": "匯出資料",
+    "exportDesc": "將資產、歷史記錄、見解與目標匯出為檔案，妥善保存以備遷移或還原。",
+    "exportJson": "匯出備份 (JSON)",
+    "exportCsv": "匯出明細 (CSV)",
+    "exportSuccess": "匯出成功",
+    "exportFailed": "匯出失敗，請重試",
+    "importTitle": "匯入資料",
+    "importTip": "匯入會將備份與現有資料合併：同名帳戶將被覆蓋，歷史記錄自動去重。",
+    "importData": "選擇備份檔案匯入",
+    "importing": "匯入中...",
+    "importInvalid": "無效的備份檔案，請選擇本應用匯出的 JSON 備份",
+    "importSuccess": "匯入成功：帳戶 {assets} 個、記錄 {records} 條、見解 {insights} 條、目標 {goals} 個"
+  },
+  "goal": {
+    "title": "財務目標",
+    "subtitle": "設定目標淨資產，追蹤達成進度",
+    "addGoal": "新增目標",
+    "editGoal": "編輯目標",
+    "name": "目標名稱",
+    "namePlaceholder": "例如：第一個 100 萬",
+    "targetAmount": "目標金額",
+    "amountPlaceholder": "請填寫目標金額",
+    "deadline": "期限",
+    "deadlinePlaceholder": "可選，格式 YYYY-MM-DD",
+    "forecastDate": "預計達成",
+    "noForecast": "暫無法預測",
+    "achieved": "已達成",
+    "emptyTip": "暫無財務目標，點擊「新增目標」設定你的第一個里程碑",
+    "deleteConfirmation": "您確定要刪除此目標嗎？",
+    "nameRequiredTip": "請填寫目標名稱",
+    "amountRequiredTip": "請填寫大於 0 的目標金額",
+    "saveFailed": "儲存失敗，請重試"
   },
   "currencys": {
     "CNY": "人民幣",

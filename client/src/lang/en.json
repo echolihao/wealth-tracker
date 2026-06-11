@@ -5,7 +5,8 @@
   "setting": "Settings",
   "settingTabs": {
     "general": "General Settings",
-    "currencies": "Custom Currencies"
+    "currencies": "Custom Currencies",
+    "data": "Data"
   },
   "update": "Update",
   "reset": "Reset",
@@ -23,6 +24,7 @@
   "amount": "Amount",
   "risk": "Risk",
   "liquidity": "Liquidity",
+  "liability": "Liability",
   "allowReset": "Allow Reset",
   "allowPassword": "Allow Password",
   "setPasswordTip": "Warning ⚠️: Lost password = Lost data forever",
@@ -47,6 +49,8 @@
   "all": "All",
   "total": "Total",
   "totalAssets": "Total Assets",
+  "totalLiabilities": "Total Liabilities",
+  "netWorth": "Net Worth",
   "distribution": "Distribution",
   "assetAllocation": "Asset Allocation",
   "currentAssetStatus": "Current Asset Status",
@@ -142,6 +146,40 @@
       "title": "No custom currencies yet",
       "tip": "Click \"Add Currency\" to create a custom currency"
     }
+  },
+  "backup": {
+    "exportTitle": "Export Data",
+    "exportDesc": "Export assets, history, insights and goals to a file for migration or recovery.",
+    "exportJson": "Export Backup (JSON)",
+    "exportCsv": "Export Records (CSV)",
+    "exportSuccess": "Export successful",
+    "exportFailed": "Export failed, please retry",
+    "importTitle": "Import Data",
+    "importTip": "Importing merges the backup into existing data: accounts with the same ID are overwritten, history records are deduplicated.",
+    "importData": "Choose a backup file",
+    "importing": "Importing...",
+    "importInvalid": "Invalid backup file. Please select a JSON backup exported by this app.",
+    "importSuccess": "Imported: {assets} accounts, {records} records, {insights} insights, {goals} goals"
+  },
+  "goal": {
+    "title": "Financial Goals",
+    "subtitle": "Set a target net worth and track your progress",
+    "addGoal": "Add Goal",
+    "editGoal": "Edit Goal",
+    "name": "Goal Name",
+    "namePlaceholder": "e.g. First million",
+    "targetAmount": "Target Amount",
+    "amountPlaceholder": "Enter the target amount",
+    "deadline": "Deadline",
+    "deadlinePlaceholder": "Optional, format YYYY-MM-DD",
+    "forecastDate": "Est. Achievement",
+    "noForecast": "Not predictable yet",
+    "achieved": "Achieved",
+    "emptyTip": "No goals yet. Click \"Add Goal\" to set your first milestone.",
+    "deleteConfirmation": "Are you sure you want to delete this goal?",
+    "nameRequiredTip": "Please enter a goal name",
+    "amountRequiredTip": "Please enter a target amount greater than 0",
+    "saveFailed": "Failed to save, please retry"
   },
   "currencys": {
     "CNY": "Chinese Yuan",

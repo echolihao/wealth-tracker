@@ -22,6 +22,8 @@
     targetCurrencyName,
     isResettable,
     totalAssetValue,
+    totalLiabilityValue,
+    netWorthValue,
     customCurrencies,
   } from '../../stores'
 
@@ -70,18 +72,28 @@
     }
   }
 
-  // 计算转换后的总资产并更新到 store
+  const isLiability = (item) => Number(item.amount) < 0
+
+  // 正数为资产，负数为负债；总负债取负值金额的绝对值之和
   $: {
-    const calculatedTotal = options.reduce((sum, item) => {
+    let assetsTotal = 0
+    let liabilitiesTotal = 0
+    options.forEach((item) => {
       const convertedAmount = convertCurrency(
         item.amount,
         item.currency,
         $targetCurrencyCode,
         $exchangeRates,
       )
-      return sum + convertedAmount
-    }, 0)
-    totalAssetValue.set(Number(calculatedTotal.toFixed(2)))
+      if (isLiability(item)) {
+        liabilitiesTotal += Math.abs(convertedAmount)
+      } else {
+        assetsTotal += convertedAmount
+      }
+    })
+    totalAssetValue.set(Number(assetsTotal.toFixed(2)))
+    totalLiabilityValue.set(Number(liabilitiesTotal.toFixed(2)))
+    netWorthValue.set(Number((assetsTotal - liabilitiesTotal).toFixed(2)))
   }
 
   const dispatch = createEventDispatcher()
@@ -167,13 +179,21 @@
     <TableBody tableBodyClass="py-4">
       {#each sortedOptions as item (item.type)}
         <TableBodyRow>
-          <TableBodyCell>{item.alias || item.type}</TableBodyCell>
+          <TableBodyCell>
+            {item.alias || item.type}
+            {#if isLiability(item)}
+              <span
+                class="text-mark border-mark ms-1 inline-flex items-center rounded-sm border bg-pink-50 px-1 py-0.5 text-xs font-medium">
+                {$_('liability')}
+              </span>
+            {/if}
+          </TableBodyCell>
           <TableBodyCell>
             <span
               class="text-brand border-brand me-1 inline-flex items-center rounded-sm border bg-yellow-50 px-1 py-0.5 text-xs font-medium">
               {getCurrencySymbol(item.currency, $customCurrencies)}
             </span>
-            {item.amount}
+            <span class:text-mark={isLiability(item)}>{item.amount}</span>
           </TableBodyCell>
           <TableBodyCell>{getCurrencyName(item.currency) + ($language ? '' : '')}</TableBodyCell>
           <TableBodyCell>
@@ -202,7 +222,7 @@
       {/each}
       <TableBodyRow>
         <TableBodyCell>
-          <strong>{$_('total')}</strong>
+          <strong>{$_('netWorth')}</strong>
         </TableBodyCell>
         <TableBodyCell>
           <strong class="text-brand font-bold">
@@ -210,7 +230,7 @@
               class="text-brand border-brand me-1 inline-flex items-center rounded-sm border bg-yellow-50 px-1 py-0.5 text-xs font-medium">
               {getCurrencySymbol($targetCurrencyCode, $customCurrencies)}
             </span>
-            {$totalAssetValue}
+            {$netWorthValue}
           </strong>
         </TableBodyCell>
         <TableBodyCell>

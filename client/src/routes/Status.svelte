@@ -15,11 +15,14 @@
   let isLoading = true
 
   // More controlled reactive update to prevent unnecessary recalculations
+  // 负债（负金额）不参与树状图，仅展示资产分布
   $: if (rawAssetsArr.length > 0 && $targetCurrencyCode) {
-    convertedAssetsArr = rawAssetsArr.map((item) => ({
-      ...item,
-      amount: convertCurrency(item.amount, item.currency, $targetCurrencyCode, $exchangeRates),
-    }))
+    convertedAssetsArr = rawAssetsArr
+      .filter((item) => Number(item.amount) >= 0)
+      .map((item) => ({
+        ...item,
+        amount: convertCurrency(item.amount, item.currency, $targetCurrencyCode, $exchangeRates),
+      }))
   }
 
   onMount(async () => {

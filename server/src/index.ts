@@ -16,41 +16,54 @@ const ensureDatabaseDirectory = async (dbPath: string) => {
   await fs.mkdir(path.dirname(dbPath), { recursive: true })
 }
 
-const addTagsColumnToAssetsIfNotExists = async () => {
+// Backward-safe SQLite migration: sequelize.sync() never adds columns to
+// existing tables, so new columns must be added explicitly via ALTER TABLE.
+const hasColumn = async (table: string, column: string) => {
+  if (!sequelize) {
+    return false
+  }
+
+  const [results] = await sequelize.query(`PRAGMA table_info(${table})`)
+  return results.some((row: any) => row.name === column)
+}
+
+// Convert legacy kind=LIABILITY rows (positive amount) back to negative amounts.
+const migrateKindToSignBasedAmounts = async () => {
   if (!sequelize) {
     return
   }
 
-  try {
-    const [results] = await sequelize.query('PRAGMA table_info(assets)')
-    const hasTagsColumn = results.some((row: any) => row.name === 'tags')
-
-    if (!hasTagsColumn) {
-      console.log('Adding tags column to assets table...')
-      await sequelize.query("ALTER TABLE assets ADD COLUMN tags TEXT DEFAULT ''")
-      console.log('✅ Tags column added successfully!')
+  for (const table of ['assets', 'record']) {
+    if (!(await hasColumn(table, 'kind'))) {
+      continue
     }
-  } catch (err) {
-    console.error('Error adding tags column:', err)
+
+    const [result] = await sequelize.query(
+      `UPDATE ${table} SET amount = -ABS(amount) WHERE kind = 'LIABILITY' AND amount > 0`,
+    )
+    const changes = (result as { changes?: number }).changes ?? 0
+    if (changes > 0) {
+      console.log(`Migrated ${changes} legacy liability rows in ${table} to negative amounts`)
+    }
   }
 }
 
-const addTagsColumnToRecordIfNotExists = async () => {
+const addColumnIfNotExists = async (table: string, column: string, definition: string) => {
   if (!sequelize) {
     return
   }
 
   try {
-    const [results] = await sequelize.query('PRAGMA table_info(record)')
-    const hasTagsColumn = results.some((row: any) => row.name === 'tags')
+    const [results] = await sequelize.query(`PRAGMA table_info(${table})`)
+    const hasColumn = results.some((row: any) => row.name === column)
 
-    if (!hasTagsColumn) {
-      console.log('Adding tags column to record table...')
-      await sequelize.query("ALTER TABLE record ADD COLUMN tags TEXT DEFAULT ''")
-      console.log('✅ Tags column added to record table successfully!')
+    if (!hasColumn) {
+      console.log(`Adding ${column} column to ${table} table...`)
+      await sequelize.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
+      console.log(`✅ ${column} column added to ${table} table successfully!`)
     }
   } catch (err) {
-    console.error('Error adding tags column to record table:', err)
+    console.error(`Error adding ${column} column to ${table} table:`, err)
   }
 }
 
@@ -62,8 +75,9 @@ const connectToSqlite = async () => {
   try {
     await ensureDatabaseDirectory(getRuntimeOptions().dbPath)
     await sequelize.sync()
-    await addTagsColumnToAssetsIfNotExists()
-    await addTagsColumnToRecordIfNotExists()
+    await addColumnIfNotExists('assets', 'tags', "TEXT DEFAULT ''")
+    await addColumnIfNotExists('record', 'tags', "TEXT DEFAULT ''")
+    await migrateKindToSignBasedAmounts()
     console.log('🎊 Database synced!')
   } catch (err) {
     console.error('Failed to sync database:', err)
@@ -90,11 +104,7 @@ const setupNotFoundHandler = (app: FastifyInstance, publicDir: string) => {
 }
 
 const loadServerModules = async () => {
-  const [
-    registerModule,
-    routesModule,
-    modelsModule,
-  ] = await Promise.all([
+  const [registerModule, routesModule, modelsModule] = await Promise.all([
     import('./register'),
     import('./routes'),
     import('./models'),
@@ -103,6 +113,7 @@ const loadServerModules = async () => {
     import('./models/assets'),
     import('./models/records'),
     import('./models/insights'),
+    import('./models/goals'),
     import('./models/password'),
     import('./models/session'),
   ])
