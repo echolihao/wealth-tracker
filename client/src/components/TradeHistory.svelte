@@ -4,6 +4,7 @@
   import { Pagination, Table } from 'flowbite-svelte'
   import SvgIcon from './SvgIcon.svelte'
   import Skeleton from './Skeleton.svelte'
+  import BatchImport from './BatchImport.svelte'
   import { deleteTrade } from '../helper/apis'
   import { alert, notice } from '../stores'
   import type { LinkType } from 'flowbite-svelte'
@@ -15,9 +16,12 @@
   export let page = 1
   export let size = 10
   export let loading = false
+  export let assetType = ''
+  export let showImportButton = false
 
   let showDeleteConfirm = false
   let deleteTarget: any = null
+  let showBatchImport = false
 
   const totalPages = Math.ceil(total / size)
 
@@ -75,7 +79,16 @@
 </script>
 
 <div class="w-full">
-  <h3 class="mb-3 text-base font-medium">{$_('recordDetails')}</h3>
+  <div class="mb-3 flex items-center justify-between">
+    <h3 class="text-base font-medium">{$_('recordDetails')}</h3>
+    {#if showImportButton}
+      <button
+        on:click={() => (showBatchImport = true)}
+        class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+        {$_('batchImport')}
+      </button>
+    {/if}
+  </div>
 
   {#if loading}
     <div class="space-y-2">
@@ -193,3 +206,11 @@
     </div>
   </div>
 {/if}
+
+<BatchImport
+  {assetType}
+  show={showBatchImport}
+  on:imported={() => {
+    showBatchImport = false
+    dispatch('imported')
+  }} />

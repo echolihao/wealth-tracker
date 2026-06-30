@@ -121,8 +121,11 @@
           page={tradePage}
           size={tradeSize}
           loading={loadingTrades}
+          assetType={selectedAccount.type}
+          showImportButton={true}
           on:deleted={handleTradeDeleted}
-          on:pageChange={handlePageChange} />
+          on:pageChange={handlePageChange}
+          on:imported={handleTradeCreated} />
       </div>
 
       <div class="mb-6" id="trade-form-component">
