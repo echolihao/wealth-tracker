@@ -1,4 +1,5 @@
 import { Op } from 'sequelize'
+import { parse } from 'csv-parse/sync'
 import { sequelize } from '../models'
 import { Assets } from '../models/assets'
 import { Position } from '../models/positions'
@@ -546,5 +547,245 @@ async function applyTradeEffect(
       updateData.amount = newQty * currentPrice
     }
     await existing.update(updateData, { transaction: t })
+  }
+}
+
+export const importTrades = async (request, reply) => {
+  const { assetType } = request.params
+
+  if (!assetType) {
+    return reply.code(400).send({
+      statusCode: 400,
+      message: 'Asset type is required.',
+    })
+  }
+
+  // Validate account is securities account
+  const account = await Assets.findByPk(assetType)
+  const isSecurities =
+    account &&
+    (account.type.startsWith('securities:') ||
+      account.alias?.startsWith('securities:'))
+  if (!isSecurities) {
+    return reply.code(400).send({
+      statusCode: 400,
+      message: 'Invalid securities account type.',
+    })
+  }
+
+  try {
+    // 1. Read uploaded file
+    const data = await request.file()
+    if (!data) {
+      return reply.code(400).send({
+        statusCode: 400,
+        message: 'No file uploaded.',
+      })
+    }
+
+    const buffer = await data.toBuffer()
+    const content = buffer.toString('utf-8').trim()
+
+    if (!content) {
+      return reply.code(400).send({
+        statusCode: 400,
+        message: 'File is empty.',
+      })
+    }
+
+    // 2. Parse CSV
+    let records: any[]
+    try {
+      records = parse(content, {
+        columns: [
+          'trade_date',
+          'type',
+          'security_symbol',
+          'security_name',
+          'quantity',
+          'price',
+          'amount',
+          'note',
+        ],
+        from: 2, // skip header row
+        skip_empty_lines: true,
+        trim: true,
+        relax_column_count: true,
+      })
+    } catch (parseErr: any) {
+      return reply.code(400).send({
+        success: false,
+        imported: 0,
+        errors: [{ row: 0, field: 'CSV', message: `CSV 解析失败: ${parseErr.message}` }],
+        details: 'CSV 文件格式错误，请检查后重试。',
+      })
+    }
+
+    if (records.length === 0) {
+      return reply.code(400).send({
+        success: false,
+        imported: 0,
+        errors: [],
+        details: 'CSV 文件中没有数据行。',
+      })
+    }
+
+    if (records.length > 1000) {
+      return reply.code(400).send({
+        success: false,
+        imported: 0,
+        errors: [],
+        details: `CSV 文件包含 ${records.length} 行，超过 1000 行上限，请分批导入。`,
+      })
+    }
+
+    // 3. Validate all rows
+    const errors: Array<{ row: number; field: string; message: string }> = []
+    const validated: Array<{
+      trade_date: string
+      type: string
+      security_symbol: string
+      security_name: string
+      quantity: number
+      price: number
+      amount: number
+      note: string
+    }> = []
+
+    records.forEach((row: any, idx: number) => {
+      const rowNum = idx + 2 // CSV row number (1-indexed, +1 for header)
+
+      // trade_date
+      if (!row.trade_date || !/^\d{4}-\d{2}-\d{2}$/.test(row.trade_date)) {
+        errors.push({ row: rowNum, field: '交易日期', message: '日期格式必须为 YYYY-MM-DD' })
+        return
+      }
+
+      // type
+      const tradeType = row.type?.toUpperCase()
+      if (!tradeType || !['BUY', 'SELL'].includes(tradeType)) {
+        errors.push({ row: rowNum, field: '操作类型', message: '操作类型必须为 BUY 或 SELL' })
+        return
+      }
+
+      // symbol
+      if (!row.security_symbol || !row.security_symbol.trim()) {
+        errors.push({ row: rowNum, field: '证券代码', message: '证券代码不能为空' })
+        return
+      }
+
+      // name
+      if (!row.security_name || !row.security_name.trim()) {
+        errors.push({ row: rowNum, field: '证券名称', message: '证券名称不能为空' })
+        return
+      }
+
+      // quantity
+      const qty = Number(row.quantity)
+      if (!qty || qty <= 0) {
+        errors.push({ row: rowNum, field: '数量', message: '数量必须为正数' })
+        return
+      }
+
+      // price
+      const p = Number(row.price)
+      if (!p || p <= 0) {
+        errors.push({ row: rowNum, field: '价格', message: '价格必须为正数' })
+        return
+      }
+
+      // amount (optional — use qty * price if not provided or empty)
+      let amt: number
+      if (row.amount === undefined || row.amount === null || row.amount === '') {
+        amt = qty * p
+      } else {
+        amt = Number(row.amount)
+        if (Math.abs(amt - qty * p) > 0.01) {
+          errors.push({ row: rowNum, field: '金额', message: '金额必须等于数量 × 价格' })
+          return
+        }
+      }
+
+      validated.push({
+        trade_date: row.trade_date,
+        type: tradeType,
+        security_symbol: row.security_symbol.trim(),
+        security_name: row.security_name.trim(),
+        quantity: qty,
+        price: p,
+        amount: amt,
+        note: row.note?.trim() || '',
+      })
+    })
+
+    if (errors.length > 0) {
+      return reply.code(400).send({
+        success: false,
+        imported: 0,
+        errors,
+        details: `导入失败：共 ${errors.length} 行有错误。`,
+      })
+    }
+
+    // 4. Sort by trade_date ascending
+    validated.sort(
+      (a, b) => a.trade_date.localeCompare(b.trade_date),
+    )
+
+    // 5. Execute in transaction
+    await sequelize.transaction(async (t) => {
+      for (const v of validated) {
+        await applyTradeEffect(
+          assetType,
+          v.type,
+          v.security_symbol,
+          v.security_name,
+          v.quantity,
+          v.price,
+          t,
+        )
+
+        // Look up position for realized_pnl calculation
+        const existing = await Position.findOne({
+          where: { asset_type: assetType, security_symbol: v.security_symbol },
+          transaction: t,
+        })
+        const costPrice = existing ? Number(existing.cost_price) : v.price
+
+        await Trade.create(
+          {
+            asset_type: assetType,
+            security_symbol: v.security_symbol,
+            security_name: v.security_name,
+            type: v.type,
+            quantity: v.quantity,
+            price: v.price,
+            amount: v.amount,
+            trade_date: v.trade_date,
+            note: v.note,
+            realized_pnl:
+              v.type === 'SELL' && existing
+                ? (v.price - costPrice) * v.quantity
+                : null,
+            created: new Date(),
+          },
+          { transaction: t },
+        )
+      }
+    })
+
+    return reply.send({
+      success: true,
+      imported: validated.length,
+      errors: [],
+      details: `成功导入 ${validated.length} 条交易记录（共 ${validated.length} 条）。`,
+    })
+  } catch (error: any) {
+    return reply.code(400).send({
+      success: false,
+      imported: 0,
+      errors: [{ row: 0, field: '系统', message: error.message }],
+      details: `导入失败：${error.message}`,
+    })
   }
 }
