@@ -104,7 +104,7 @@
       on:select={handleAccountSelect} />
 
     {#if selectedAccount}
-      <div class="mb-6">
+      <div class="mb-6 rounded-lg border border-gray-200 p-4">
         <h3 class="mb-3 text-base font-medium">{$_('positions')}</h3>
         <PositionsTable
           {positions}
@@ -114,7 +114,7 @@
           on:priceUpdated={handlePositionUpdated} />
       </div>
 
-      <div class="mb-6">
+      <div class="mb-6 rounded-lg border border-gray-200 p-4">
         <TradeHistory
           {trades}
           total={tradeTotal}
