@@ -474,8 +474,9 @@ async function applyTradeEffect(
   quantity: number,
   price: number,
   t: any,
+  existingPosition?: any,
 ) {
-  const existing = await Position.findOne({
+  const existing = existingPosition || await Position.findOne({
     where: { asset_type: assetType, security_symbol: symbol },
     transaction: t,
   })
@@ -750,6 +751,7 @@ export const importTrades = async (request, reply) => {
           v.quantity,
           v.price,
           t,
+          posBefore,
         )
 
         await Trade.create(

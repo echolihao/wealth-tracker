@@ -15,7 +15,7 @@ export default async (fastify) => {
     .register(import('@fastify/cookie'))
     .register(import('@fastify/rate-limit'), rateLimitOptions)
     .register(import('fastify-xml-body-parser'))
-    .register(require('@fastify/multipart'))
+    .register(require('@fastify/multipart'), { limits: { fileSize: 5 * 1024 * 1024 } })
     .register(import('./middleware/auth'))
     .ready((err) => {
       if (err) console.log(`Something Error @Start：${err}`)
