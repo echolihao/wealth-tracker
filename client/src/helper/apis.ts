@@ -123,3 +123,35 @@ export const updateCustomCurrency = (id, data) => {
 export const deleteCustomCurrency = (id) => {
   return $ajax.delete(genApiPath(`currencies/${id}`), {})
 }
+
+export const getSecuritiesAccounts = () => {
+  return $ajax.get(genApiPath('trades/securities-accounts'), {})
+}
+
+export const getPositions = (assetType: string) => {
+  return $ajax.get(genApiPath(`assets/${assetType}/positions`), {})
+}
+
+export const updatePositionPrice = (
+  assetType: string,
+  symbol: string,
+  data: { current_price?: number; amount?: number },
+) => {
+  return $ajax.put(genApiPath(`assets/${assetType}/positions/${symbol}`), data)
+}
+
+export const getTrades = (assetType: string, data = {}) => {
+  return $ajax.get(genApiPath(`assets/${assetType}/trades`), data)
+}
+
+export const createTrade = (assetType: string, data: any) => {
+  return $ajax.post(genApiPath(`assets/${assetType}/trades`), data)
+}
+
+export const updateTrade = (id: number, data: any) => {
+  return $ajax.put(genApiPath(`trades/${id}`), data)
+}
+
+export const deleteTrade = (id: number) => {
+  return $ajax.delete(genApiPath(`trades/${id}`), {})
+}
