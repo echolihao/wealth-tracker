@@ -155,3 +155,9 @@ export const updateTrade = (id: number, data: any) => {
 export const deleteTrade = (id: number) => {
   return $ajax.delete(genApiPath(`trades/${id}`), {})
 }
+
+export const importTrades = (assetType: string, file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return $ajax.post(genApiPath(`assets/${assetType}/trades/import`), formData)
+}

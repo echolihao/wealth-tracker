@@ -254,5 +254,14 @@
   "deleteTradeConfirm": "Supprimer cette transaction ? La position sera restaurée.",
   "editPrice": "Modifier le prix",
   "totalInvestment": "Investissement total",
-  "holdingCount": "Titres détenus"
+  "holdingCount": "Titres détenus",
+  "batchImport": "Import par lot",
+  "downloadTemplate": "Télécharger le modèle",
+  "selectFile": "Sélectionner un fichier",
+  "import": "Importer",
+  "importSuccess": "{count} transactions importées avec succès",
+  "importFailed": "Échec de l'importation",
+  "importDetails": "Détails",
+  "selectCsvFile": "Veuillez sélectionner un fichier CSV",
+  "noFileSelected": "Aucun fichier sélectionné"
 }

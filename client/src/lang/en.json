@@ -254,5 +254,14 @@
   "deleteTradeConfirm": "Delete this trade? This will revert the position.",
   "editPrice": "Edit Price",
   "totalInvestment": "Total Investment",
-  "holdingCount": "Holdings"
+  "holdingCount": "Holdings",
+  "batchImport": "Batch Import",
+  "downloadTemplate": "Download Template",
+  "selectFile": "Select File",
+  "import": "Import",
+  "importSuccess": "Successfully imported {count} trade records",
+  "importFailed": "Import Failed",
+  "importDetails": "Details",
+  "selectCsvFile": "Please select a CSV file",
+  "noFileSelected": "No file selected"
 }

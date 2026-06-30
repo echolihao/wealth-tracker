@@ -254,5 +254,14 @@
   "deleteTradeConfirm": "確定刪除此交易記錄？刪除後將回退持倉。",
   "editPrice": "編輯現價",
   "totalInvestment": "總投資",
-  "holdingCount": "持有證券"
+  "holdingCount": "持有證券",
+  "batchImport": "批量匯入",
+  "downloadTemplate": "下載範本",
+  "selectFile": "選擇檔案",
+  "import": "匯入",
+  "importSuccess": "成功匯入 {count} 條交易記錄",
+  "importFailed": "匯入失敗",
+  "importDetails": "詳情",
+  "selectCsvFile": "請選擇 CSV 檔案",
+  "noFileSelected": "未選擇檔案"
 }

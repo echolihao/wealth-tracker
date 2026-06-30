@@ -254,5 +254,14 @@
   "deleteTradeConfirm": "この取引を削除しますか？ポジションも元に戻ります。",
   "editPrice": "現在値を編集",
   "totalInvestment": "総投資額",
-  "holdingCount": "保有証券"
+  "holdingCount": "保有証券",
+  "batchImport": "バッチインポート",
+  "downloadTemplate": "テンプレートをダウンロード",
+  "selectFile": "ファイルを選択",
+  "import": "インポート",
+  "importSuccess": "{count} 件の取引レコードを正常にインポートしました",
+  "importFailed": "インポートに失敗しました",
+  "importDetails": "詳細",
+  "selectCsvFile": "CSV ファイルを選択してください",
+  "noFileSelected": "ファイルが選択されていません"
 }
