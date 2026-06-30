@@ -15,9 +15,13 @@ client/public/google*.html
 # Server assets
 server/public
 
-# Datebase
+# Database
 server/dist
 server/data/*.sqlite
+data/
+
+# Package manager lock files (yarn workspace)
+package-lock.json
 desktop/dist
 desktop/release
 desktop/.stage

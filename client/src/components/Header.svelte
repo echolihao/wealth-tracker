@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { Dropdown, DropdownItem } from 'flowbite-svelte'
-  import { locale } from 'svelte-i18n'
+  import { _, locale } from 'svelte-i18n'
   import SvgIcon from './SvgIcon.svelte'
   import { language, theme } from '../stores'
   import { trackEvent } from '../helper/analytics'
