@@ -23,8 +23,8 @@
   const formatPrice = (value: any) => {
     if (value === null || value === undefined) return '-'
     return Number(value).toLocaleString('zh-CN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 4,
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
     })
   }
 

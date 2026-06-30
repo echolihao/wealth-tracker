@@ -23,8 +23,8 @@
 
   const formatAmount = (value: any) => {
     return Number(value).toLocaleString('zh-CN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
     })
   }
 
