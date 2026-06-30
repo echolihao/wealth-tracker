@@ -238,7 +238,7 @@
   "quantity": "数量",
   "price": "单价",
   "tradeDate": "交易日期",
-  "tradeAmount": "成交金额",
+  "tradeAmount": "市值",
   "costPrice": "成本价",
   "currentPrice": "现价",
   "profitLoss": "盈亏",

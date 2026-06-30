@@ -238,7 +238,7 @@
   "quantity": "Qty",
   "price": "Price",
   "tradeDate": "Trade Date",
-  "tradeAmount": "Amount",
+  "tradeAmount": "Market Value",
   "costPrice": "Cost Price",
   "currentPrice": "Current Price",
   "profitLoss": "P&L",
