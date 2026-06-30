@@ -96,6 +96,7 @@
           <th class="text-right">{$_('costPrice')}</th>
           <th class="text-right">{$_('currentPrice')}</th>
           <th class="text-right">{$_('tradeAmount')}</th>
+          <th class="text-right">{$_('profitLoss')}</th>
           <th class="text-center">{$_('action')}</th>
         </tr>
       </thead>
@@ -126,6 +127,17 @@
               {/if}
             </td>
             <td class="text-right font-mono text-sm">{formatPrice(position.amount)}</td>
+            <td class="text-right font-mono text-sm">
+              {#if position.current_price != null && position.cost_price != null}
+                {@const unrealizedPnl = (Number(position.current_price) - Number(position.cost_price)) * Number(position.quantity)}
+                {@const realizedPnl = Number(position.realized_pnl ?? 0)}
+                {@const totalPnl = unrealizedPnl + realizedPnl}
+                <span class:font-medium={true} class:text-green-600={totalPnl > 0} class:text-red-600={totalPnl < 0}
+                  >{totalPnl > 0 ? '+' : ''}{totalPnl.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              {:else}
+                -
+              {/if}
+            </td>
             <td class="text-center">
               <button
                 on:click={() => handleSell(position)}

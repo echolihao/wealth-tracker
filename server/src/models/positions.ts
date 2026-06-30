@@ -41,6 +41,11 @@ Position.init(
       allowNull: false,
       defaultValue: 0,
     },
+    realized_pnl: {
+      type: DataTypes.DECIMAL(14, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
     status: {
       type: DataTypes.STRING,
       allowNull: false,

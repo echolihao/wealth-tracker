@@ -47,6 +47,10 @@ Trade.init(
       allowNull: true,
       defaultValue: '',
     },
+    realized_pnl: {
+      type: DataTypes.DECIMAL(14, 2),
+      allowNull: true,
+    },
     created: {
       type: DataTypes.DATE,
       allowNull: true,

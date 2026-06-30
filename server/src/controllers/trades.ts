@@ -171,6 +171,17 @@ export const createTrade = async (request, reply) => {
 
   try {
     const result = await sequelize.transaction(async (t) => {
+      // 0. Look up existing position for realized_pnl calculation
+      const existing = await Position.findOne({
+        where: {
+          asset_type: assetType,
+          security_symbol: params.security_symbol,
+        },
+        transaction: t,
+      })
+
+      const costPrice = existing ? Number(existing.cost_price) : price
+
       // 1. Create trade record
       const trade = await Trade.create(
         {
@@ -183,19 +194,16 @@ export const createTrade = async (request, reply) => {
           amount,
           trade_date,
           note: params.note || '',
+          realized_pnl:
+            params.type === 'SELL' && existing
+              ? (price - costPrice) * quantity
+              : null,
           created: new Date(),
         },
         { transaction: t },
       )
 
       // 2. Update position
-      const existing = await Position.findOne({
-        where: {
-          asset_type: assetType,
-          security_symbol: params.security_symbol,
-        },
-        transaction: t,
-      })
 
       if (params.type === 'BUY') {
         if (existing) {
@@ -246,8 +254,11 @@ export const createTrade = async (request, reply) => {
           )
         }
         const newQty = oldQty - quantity
+        const costPrice = Number(existing.cost_price)
+        const realizedPnl = (price - costPrice) * quantity
         const updateData: any = {
           quantity: newQty,
+          realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
           updated: new Date(),
         }
         if (newQty === 0) {
@@ -257,7 +268,7 @@ export const createTrade = async (request, reply) => {
           const currentPrice =
             existing.current_price !== null
               ? Number(existing.current_price)
-              : Number(existing.cost_price)
+              : costPrice
           updateData.amount = newQty * currentPrice
         }
         await existing.update(updateData, { transaction: t })
@@ -289,6 +300,7 @@ export const updateTrade = async (request, reply) => {
 
       // Reverse old trade
       await reverseTradeEffect(oldTrade, t)
+
       // Apply new trade
       const newType = params.type || oldTrade.type
       const newSymbol = params.security_symbol || oldTrade.security_symbol
@@ -297,6 +309,13 @@ export const updateTrade = async (request, reply) => {
       const newPrice = Number(params.price ?? oldTrade.price)
       const newAmount = Number(params.amount ?? oldTrade.amount)
       const newDate = params.trade_date || oldTrade.trade_date
+
+      // Query position state before applying new trade (for realized_pnl calculation)
+      const posBefore = await Position.findOne({
+        where: { asset_type: oldTrade.asset_type, security_symbol: newSymbol },
+        transaction: t,
+      })
+      const costPriceBefore = posBefore ? Number(posBefore.cost_price) : newPrice
 
       await applyTradeEffect(
         oldTrade.asset_type,
@@ -318,6 +337,10 @@ export const updateTrade = async (request, reply) => {
           amount: newAmount,
           trade_date: newDate,
           note: params.note !== undefined ? params.note : oldTrade.note,
+          realized_pnl:
+            newType === 'SELL' && posBefore
+              ? (newPrice - costPriceBefore) * newQty
+              : null,
         },
         { where: { id }, transaction: t },
       )
@@ -400,6 +423,7 @@ async function reverseTradeEffect(trade: any, t: any) {
     }
   } else {
     // Reverse sell: increase quantity
+    const tradeRealizedPnl = Number(trade.realized_pnl ?? 0)
     if (existing) {
       const oldQty = Number(existing.quantity)
       const newQty = oldQty + qty
@@ -412,6 +436,7 @@ async function reverseTradeEffect(trade: any, t: any) {
           quantity: newQty,
           status: 'Open',
           amount: newQty * currentPrice,
+          realized_pnl: Number(existing.realized_pnl ?? 0) - tradeRealizedPnl,
           updated: new Date(),
         },
         { transaction: t },
@@ -428,6 +453,7 @@ async function reverseTradeEffect(trade: any, t: any) {
           cost_price: price,
           current_price: price,
           amount: qty * currentPrice,
+          realized_pnl: -tradeRealizedPnl,
           status: 'Open',
           created: new Date(),
           updated: new Date(),
@@ -502,8 +528,11 @@ async function applyTradeEffect(
       )
     }
     const newQty = oldQty - quantity
+    const costPrice = Number(existing.cost_price)
+    const realizedPnl = (price - costPrice) * quantity
     const updateData: any = {
       quantity: newQty,
+      realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
       updated: new Date(),
     }
     if (newQty === 0) {
@@ -513,7 +542,7 @@ async function applyTradeEffect(
       const currentPrice =
         existing.current_price !== null
           ? Number(existing.current_price)
-          : Number(existing.cost_price)
+          : costPrice
       updateData.amount = newQty * currentPrice
     }
     await existing.update(updateData, { transaction: t })

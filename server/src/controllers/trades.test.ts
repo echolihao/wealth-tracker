@@ -66,6 +66,7 @@ function mockReply() {
 
 function makePositionInstance(overrides: Record<string, any> = {}) {
   const instance: any = {
+    realized_pnl: 0,
     ...overrides,
     update: vi.fn().mockImplementation(function (this: any, data: any) {
       Object.assign(this, data)
@@ -559,6 +560,75 @@ describe('createTrade', () => {
       )
     })
 
+    it('should track realized_pnl on SELL trade record', async () => {
+      const trade = makeTradeInstance({ type: 'SELL' })
+      const existingPos = makePositionInstance({
+        asset_type: 'securities:ibkr',
+        security_symbol: 'AAPL',
+        quantity: 15,
+        cost_price: 140,
+        current_price: 160,
+        amount: 2400,
+        status: 'Open',
+      })
+      mockTradeCreate.mockResolvedValue(trade)
+      mockPositionFindOne.mockResolvedValue(existingPos)
+      const reply = mockReply()
+
+      await tradesCtrl.createTrade(makeRequest({ type: 'SELL' }) as any, reply)
+
+      // Trade record should store realized_pnl = (sell_price - cost_price) * qty
+      expect(mockTradeCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          realized_pnl: (150 - 140) * 10,
+        }),
+        { transaction: mockT },
+      )
+    })
+
+    it('should update position realized_pnl on SELL', async () => {
+      const trade = makeTradeInstance({ type: 'SELL' })
+      const existingPos = makePositionInstance({
+        asset_type: 'securities:ibkr',
+        security_symbol: 'AAPL',
+        quantity: 15,
+        cost_price: 140,
+        current_price: 160,
+        amount: 2400,
+        status: 'Open',
+        realized_pnl: 50,
+      })
+      mockTradeCreate.mockResolvedValue(trade)
+      mockPositionFindOne.mockResolvedValue(existingPos)
+      const reply = mockReply()
+
+      await tradesCtrl.createTrade(makeRequest({ type: 'SELL' }) as any, reply)
+
+      // Position realized_pnl should accumulate: 50 + (150 - 140) * 10 = 150
+      expect(existingPos.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          realized_pnl: 150,
+        }),
+        { transaction: mockT },
+      )
+    })
+
+    it('should set realized_pnl to null on BUY trade record', async () => {
+      const trade = makeTradeInstance()
+      mockTradeCreate.mockResolvedValue(trade)
+      mockPositionFindOne.mockResolvedValue(null)
+      const reply = mockReply()
+
+      await tradesCtrl.createTrade(makeRequest() as any, reply)
+
+      expect(mockTradeCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          realized_pnl: null,
+        }),
+        { transaction: mockT },
+      )
+    })
+
     it('should close position when SELL depletes quantity to zero', async () => {
       const existingPos = makePositionInstance({
         quantity: 10,
@@ -740,6 +810,55 @@ describe('updateTrade', () => {
       expect.anything(),
     )
   })
+
+  it('should recalculate realized_pnl on trade update for SELL', async () => {
+    // Old trade: BUY 10 @ $150 (no realized_pnl since it's a buy)
+    // New trade: SELL 5 @ $160
+    // After reversing old BUY (10 @ $150), cost_price before new trade = 150
+    // realized_pnl on trade record = (160 - 150) * 5 = 50
+    const updatedTrade = {
+      ...oldTrade,
+      type: 'SELL',
+      quantity: 5,
+      price: 160,
+    }
+    const existingPos = makePositionInstance({
+      asset_type: 'securities:ibkr',
+      security_symbol: 'AAPL',
+      quantity: 20,
+      cost_price: 150,
+      current_price: 150,
+      amount: 3000,
+    })
+
+    mockTradeFindByPk.mockResolvedValueOnce(oldTrade)
+    mockTradeFindByPk.mockResolvedValueOnce(updatedTrade)
+    mockPositionFindOne.mockResolvedValue(existingPos)
+    const reply = mockReply()
+
+    await tradesCtrl.updateTrade(
+      {
+        params: { id: '1' },
+        body: {
+          type: 'SELL',
+          security_symbol: 'AAPL',
+          security_name: 'Apple Inc.',
+          quantity: 5,
+          price: 160,
+          amount: 800,
+          trade_date: '2024-01-20',
+        },
+      } as any,
+      reply,
+    )
+
+    expect(mockTradeUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        realized_pnl: (160 - 150) * 5,
+      }),
+      expect.anything(),
+    )
+  })
 })
 
 describe('deleteTrade', () => {
@@ -880,7 +999,7 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
     )
   })
 
-  it('should reverse a SELL trade and increase quantity', async () => {
+  it('should reverse a SELL trade, increase quantity and subtract realized_pnl', async () => {
     const existingPos = makePositionInstance({
       asset_type: 'securities:ibkr',
       security_symbol: 'AAPL',
@@ -889,10 +1008,11 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
       current_price: 155,
       amount: 775,
       status: 'Open',
+      realized_pnl: 150,
     })
 
     mockTradeFindByPk.mockResolvedValue(
-      makeTradeInstance({ type: 'SELL', quantity: 10, price: 160 }),
+      makeTradeInstance({ type: 'SELL', quantity: 10, price: 160, realized_pnl: 100 }),
     )
     mockPositionFindOne.mockResolvedValue(existingPos)
     const reply = mockReply()
@@ -904,14 +1024,15 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
         quantity: 15,
         status: 'Open',
         amount: 15 * 155,
+        realized_pnl: 50, // 150 - 100
       }),
       expect.anything(),
     )
   })
 
-  it('should recreate position when reversing SELL and no position exists', async () => {
+  it('should set realized_pnl when recreating position on SELL reversal', async () => {
     mockTradeFindByPk.mockResolvedValue(
-      makeTradeInstance({ type: 'SELL', quantity: 10, price: 160 }),
+      makeTradeInstance({ type: 'SELL', quantity: 10, price: 160, realized_pnl: 100 }),
     )
     mockPositionFindOne.mockResolvedValue(null)
     mockPositionCreate.mockResolvedValue(
@@ -929,6 +1050,7 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
         cost_price: 160,
         current_price: 160,
         amount: 1600,
+        realized_pnl: -100, // reverse the realized P&L
         status: 'Open',
       }),
       { transaction: mockT },
