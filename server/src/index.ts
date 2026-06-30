@@ -116,6 +116,8 @@ const loadServerModules = async () => {
     import('./models/goals'),
     import('./models/password'),
     import('./models/session'),
+    import('./models/positions'),
+    import('./models/trades'),
   ])
 
   sequelize = modelsModule.sequelize
