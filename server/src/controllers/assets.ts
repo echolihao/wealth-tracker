@@ -1,3 +1,4 @@
+import { sequelize } from '../models'
 import { Assets } from './../models/assets'
 import { Record } from './../models/records'
 import { Position } from './../models/positions'
@@ -77,10 +78,12 @@ export const update = async (request, reply) => {
 export const destroy = async (request, reply) => {
   const { type = '' } = request?.body
   try {
-    await Trade.destroy({ where: { asset_type: type } })
-    await Position.destroy({ where: { asset_type: type } })
-    await Assets.destroy({ where: { type } })
-    await Record.destroy({ where: { type } })
+    await sequelize.transaction(async (t) => {
+      await Trade.destroy({ where: { asset_type: type }, transaction: t })
+      await Position.destroy({ where: { asset_type: type }, transaction: t })
+      await Assets.destroy({ where: { type }, transaction: t })
+      await Record.destroy({ where: { type }, transaction: t })
+    })
     return reply.send({ result: true })
   } catch (error: any) {
     return reply.code(400).send({

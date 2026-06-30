@@ -10,6 +10,7 @@
   import TradeHistory from '../components/TradeHistory.svelte'
   import { getPositions, getTrades } from '../helper/apis'
   import { updatePageMetaInfo } from '../helper/utils'
+  import { notice } from '../stores'
 
   let selectedAccount: any = null
   let positions: any[] = []
@@ -39,6 +40,7 @@
       positions = (await getPositions(selectedAccount.type)) || []
     } catch (error) {
       console.error('Error fetching positions:', error)
+      notice.set('Failed to load positions')
     } finally {
       loadingPositions = false
     }
@@ -56,6 +58,7 @@
       tradeTotal = result.total || 0
     } catch (error) {
       console.error('Error fetching trades:', error)
+      notice.set('Failed to load trades')
     } finally {
       loadingTrades = false
     }
