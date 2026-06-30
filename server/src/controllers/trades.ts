@@ -735,6 +735,13 @@ export const importTrades = async (request, reply) => {
     // 5. Execute in transaction
     await sequelize.transaction(async (t) => {
       for (const v of validated) {
+        // Look up position BEFORE applyTradeEffect for correct cost_price
+        const posBefore = await Position.findOne({
+          where: { asset_type: assetType, security_symbol: v.security_symbol },
+          transaction: t,
+        })
+        const costPrice = posBefore ? Number(posBefore.cost_price) : v.price
+
         await applyTradeEffect(
           assetType,
           v.type,
@@ -744,13 +751,6 @@ export const importTrades = async (request, reply) => {
           v.price,
           t,
         )
-
-        // Look up position for realized_pnl calculation
-        const existing = await Position.findOne({
-          where: { asset_type: assetType, security_symbol: v.security_symbol },
-          transaction: t,
-        })
-        const costPrice = existing ? Number(existing.cost_price) : v.price
 
         await Trade.create(
           {
@@ -764,7 +764,7 @@ export const importTrades = async (request, reply) => {
             trade_date: v.trade_date,
             note: v.note,
             realized_pnl:
-              v.type === 'SELL' && existing
+              v.type === 'SELL' && posBefore
                 ? (v.price - costPrice) * v.quantity
                 : null,
             created: new Date(),
