@@ -137,14 +137,6 @@
       on:click={() => trackEvent('social-link-click', { platform: 'x' })}>
       <SvgIcon name="x" width={20} height={20} color="#212121" />
     </a>
-    <a
-      href="/trade"
-      class="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium
-        text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-      on:click={() => trackEvent('navigation-click', { page: 'trade' })}>
-      <SvgIcon name="adjustment" width={18} height={18} color="#212121" class="mr-1" />
-      {$_('trade')}
-    </a>
     <button
       on:click={onToggleTheme}
       class="focus-visible-ring hover:text-accent-foreground inline-flex
