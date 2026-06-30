@@ -3,6 +3,8 @@ import { Record } from '../models/records'
 import { Insight } from '../models/insights'
 import { Goal } from '../models/goals'
 import CustomCurrency from '../models/customCurrency'
+import { Position } from '../models/positions'
+import { Trade } from '../models/trades'
 import { normalizeGoalInput } from '../helper/goals'
 
 const BACKUP_APP_NAME = 'wealth-tracker'
@@ -29,19 +31,21 @@ const genInsightKey = (item: any) => {
 
 export const exportData = async (_, reply) => {
   try {
-    const [assets, records, insights, goals, customCurrencies] = await Promise.all([
+    const [assets, records, insights, goals, customCurrencies, positions, trades] = await Promise.all([
       Assets.findAll({ raw: true }),
       Record.findAll({ raw: true }),
       Insight.findAll({ raw: true }),
       Goal.findAll({ raw: true }),
       CustomCurrency.findAll({ raw: true }),
+      Position.findAll({ raw: true }),
+      Trade.findAll({ raw: true }),
     ])
 
     return reply.send({
       app: BACKUP_APP_NAME,
       version: BACKUP_VERSION,
       exportedAt: new Date().toISOString(),
-      data: { assets, records, insights, goals, customCurrencies },
+      data: { assets, records, insights, goals, customCurrencies, positions, trades },
     })
   } catch (error: any) {
     return reply.code(400).send({
@@ -63,7 +67,7 @@ export const importData = async (request, reply) => {
   }
 
   try {
-    const counts = { assets: 0, records: 0, insights: 0, goals: 0, customCurrencies: 0 }
+    const counts = { assets: 0, records: 0, insights: 0, goals: 0, customCurrencies: 0, positions: 0, trades: 0 }
 
     if (Array.isArray(data.assets)) {
       for (const item of data.assets) {
@@ -180,6 +184,48 @@ export const importData = async (request, reply) => {
           await CustomCurrency.create(values)
         }
         counts.customCurrencies += 1
+      }
+    }
+
+    if (Array.isArray(data.positions)) {
+      for (const item of data.positions) {
+        if (!item?.asset_type || !item?.security_symbol) continue
+        await Position.upsert({
+          id: item.id,
+          asset_type: item.asset_type,
+          security_symbol: item.security_symbol,
+          security_name: item.security_name,
+          quantity: item.quantity || 0,
+          cost_price: item.cost_price || 0,
+          current_price: item.current_price || null,
+          amount: item.amount || 0,
+          status: item.status || 'Open',
+          created: item.created || new Date(),
+          updated: new Date(),
+        })
+        counts.positions += 1
+      }
+    }
+
+    if (Array.isArray(data.trades)) {
+      for (const item of data.trades) {
+        if (!item?.asset_type || !item?.security_symbol) continue
+        const existing = await Trade.findOne({ where: { id: item.id } })
+        if (!existing) {
+          await Trade.create({
+            asset_type: item.asset_type,
+            security_symbol: item.security_symbol,
+            security_name: item.security_name,
+            type: item.type,
+            quantity: item.quantity,
+            price: item.price,
+            amount: item.amount,
+            trade_date: item.trade_date,
+            note: item.note || '',
+            created: item.created || new Date(),
+          })
+        }
+        counts.trades += 1
       }
     }
 

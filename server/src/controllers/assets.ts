@@ -1,5 +1,7 @@
 import { Assets } from './../models/assets'
 import { Record } from './../models/records'
+import { Position } from './../models/positions'
+import { Trade } from './../models/trades'
 
 export const create = async (request, reply) => {
   const params = request?.body
@@ -75,6 +77,8 @@ export const update = async (request, reply) => {
 export const destroy = async (request, reply) => {
   const { type = '' } = request?.body
   try {
+    await Trade.destroy({ where: { asset_type: type } })
+    await Position.destroy({ where: { asset_type: type } })
     await Assets.destroy({ where: { type } })
     await Record.destroy({ where: { type } })
     return reply.send({ result: true })
