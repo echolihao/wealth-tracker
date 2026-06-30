@@ -96,6 +96,22 @@ export default {
       "children": []
     },
     {
+      "meta": {},
+      "id": "_default_Trade_svelte",
+      "_regex": {},
+      "_paramKeys": {},
+      "name": "Trade",
+      "file": {
+        "path": "src/routes/Trade.svelte",
+        "dir": "src/routes",
+        "base": "Trade.svelte",
+        "ext": ".svelte",
+        "name": "Trade"
+      },
+      "asyncModule": () => import('../src/routes/Trade.svelte'),
+      "children": []
+    },
+    {
       "meta": {
         "dynamic": true,
         "dynamicSpread": true

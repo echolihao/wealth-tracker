@@ -8,7 +8,10 @@ export const getSecuritiesAccounts = async (_, reply) => {
   try {
     const data = await Assets.findAll({
       where: {
-        type: { [Op.startsWith]: 'securities:' },
+        [Op.or]: [
+          { type: { [Op.startsWith]: 'securities:' } },
+          { alias: { [Op.startsWith]: 'securities:' } },
+        ],
       },
     })
     return reply.send(data)
@@ -103,7 +106,18 @@ export const createTrade = async (request, reply) => {
   const { assetType } = request.params
   const params = request.body
 
-  if (!assetType || !assetType.startsWith('securities:')) {
+  if (!assetType) {
+    return reply.code(400).send({
+      statusCode: 400,
+      message: 'Asset type is required.',
+    })
+  }
+  const account = await Assets.findByPk(assetType)
+  const isSecurities =
+    account &&
+    (account.type.startsWith('securities:') ||
+      account.alias?.startsWith('securities:'))
+  if (!isSecurities) {
     return reply.code(400).send({
       statusCode: 400,
       message: 'Invalid securities account type.',

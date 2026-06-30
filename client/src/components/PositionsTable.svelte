@@ -17,8 +17,8 @@
   let editingPrice: string = ''
   let showClosed = false
 
-  const openPositions = positions.filter((p: any) => p.status === 'Open')
-  const closedPositions = positions.filter((p: any) => p.status === 'Closed')
+  $: openPositions = positions.filter((p: any) => p.status === 'Open')
+  $: closedPositions = positions.filter((p: any) => p.status === 'Closed')
 
   const formatPrice = (value: any) => {
     if (value === null || value === undefined) return '-'
