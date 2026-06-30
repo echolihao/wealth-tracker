@@ -6,11 +6,12 @@ import { Trade } from '../models/trades'
 
 export const getSecuritiesAccounts = async (_, reply) => {
   try {
-    const assets = await Assets.findAll()
-    const securitiesAccounts = assets.filter((a: any) =>
-      a.type.startsWith('securities:'),
-    )
-    return reply.send(securitiesAccounts)
+    const data = await Assets.findAll({
+      where: {
+        type: { [Op.startsWith]: 'securities:' },
+      },
+    })
+    return reply.send(data)
   } catch (error: any) {
     return reply.code(400).send({
       statusCode: 400,
@@ -39,29 +40,32 @@ export const updatePositionPrice = async (request, reply) => {
   const { assetType, symbol } = request.params
   const { current_price, amount } = request.body
   try {
-    const position = await Position.findOne({
-      where: { asset_type: assetType, security_symbol: symbol },
-    })
-    if (!position) {
-      return reply.code(404).send({
-        statusCode: 404,
-        message: 'Position not found.',
+    const result = await sequelize.transaction(async (t) => {
+      const position = await Position.findOne({
+        where: { asset_type: assetType, security_symbol: symbol },
+        transaction: t,
       })
-    }
-    const updateData: any = { updated: new Date() }
-    if (current_price !== undefined) {
-      updateData.current_price = current_price
-    }
-    if (amount !== undefined) {
-      updateData.amount = amount
-    }
-    await Position.update(updateData, {
-      where: { asset_type: assetType, security_symbol: symbol },
+      if (!position) {
+        throw new Error('Position not found.')
+      }
+      const updateData: any = { updated: new Date() }
+      if (current_price !== undefined) {
+        updateData.current_price = current_price
+      }
+      if (amount !== undefined) {
+        updateData.amount = amount
+      }
+      await Position.update(updateData, {
+        where: { asset_type: assetType, security_symbol: symbol },
+        transaction: t,
+      })
+      const updated = await Position.findOne({
+        where: { asset_type: assetType, security_symbol: symbol },
+        transaction: t,
+      })
+      return updated
     })
-    const updated = await Position.findOne({
-      where: { asset_type: assetType, security_symbol: symbol },
-    })
-    return reply.send(updated)
+    return reply.send(result)
   } catch (error: any) {
     return reply.code(400).send({
       statusCode: 400,
@@ -261,15 +265,14 @@ export const updateTrade = async (request, reply) => {
   const { id } = request.params
   const params = request.body
   try {
-    const oldTrade = await Trade.findByPk(id)
-    if (!oldTrade) {
-      return reply.code(404).send({
-        statusCode: 404,
-        message: 'Trade not found.',
-      })
-    }
+    let updated
 
     await sequelize.transaction(async (t) => {
+      const oldTrade = await Trade.findByPk(id, { transaction: t })
+      if (!oldTrade) {
+        throw new Error('Trade not found.')
+      }
+
       // Reverse old trade
       await reverseTradeEffect(oldTrade, t)
       // Apply new trade
@@ -288,7 +291,6 @@ export const updateTrade = async (request, reply) => {
         newName,
         newQty,
         newPrice,
-        newAmount,
         t,
       )
 
@@ -305,9 +307,10 @@ export const updateTrade = async (request, reply) => {
         },
         { where: { id }, transaction: t },
       )
+
+      updated = await Trade.findByPk(id, { transaction: t })
     })
 
-    const updated = await Trade.findByPk(id)
     return reply.send(updated)
   } catch (error: any) {
     return reply.code(400).send({
@@ -320,15 +323,11 @@ export const updateTrade = async (request, reply) => {
 export const deleteTrade = async (request, reply) => {
   const { id } = request.params
   try {
-    const trade = await Trade.findByPk(id)
-    if (!trade) {
-      return reply.code(404).send({
-        statusCode: 404,
-        message: 'Trade not found.',
-      })
-    }
-
     await sequelize.transaction(async (t) => {
+      const trade = await Trade.findByPk(id, { transaction: t })
+      if (!trade) {
+        throw new Error('Trade not found.')
+      }
       await reverseTradeEffect(trade, t)
       await Trade.destroy({ where: { id }, transaction: t })
     })
@@ -433,7 +432,6 @@ async function applyTradeEffect(
   name: string,
   quantity: number,
   price: number,
-  amount: number,
   t: any,
 ) {
   const existing = await Position.findOne({
