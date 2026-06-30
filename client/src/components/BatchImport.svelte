@@ -60,9 +60,11 @@
         dispatch('imported')
       }
     } catch (error: any) {
-      const errData = error?.response?.data
-      if (errData && errData.errors) {
-        result = errData
+      // error from ajax.ts .catch: err.response.data (the response body)
+      if (error && error.errors) {
+        result = error
+      } else if (error?.response?.data?.errors) {
+        result = error.response.data
       } else {
         const msg = error?.response?.data?.message || error.message || 'Network error'
         result = {
