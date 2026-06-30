@@ -29,7 +29,7 @@
 `POST /api/assets/:assetType/trades/import`
 
 - 使用 `@fastify/multipart` 接收 CSV 文件上传
-- 新增 npm 依赖：`csv-parse`、`iconv-lite`
+- 新增 npm 依赖：`csv-parse`
 
 ### 处理流程
 
@@ -146,7 +146,7 @@ importTrades(assetType: string, file: File): Promise<ImportResult>
 - **网络错误**：显示"网络连接失败，请重试"
 - **文件过大**：服务端限制后返回错误信息
 - **空文件**：提示"文件为空"
-- **编码问题**：同时支持 UTF-8 和 GBK 编码。服务端使用 `iconv-lite` 检测并转换 GBK 编码的 CSV 文件为 UTF-8 后再解析
+- **编码问题**：仅支持 UTF-8 编码 CSV 文件
 - **行数过多**：设置合理上限（如 1000 条），超限提示分批导入
 
 ## 风险与注意事项
