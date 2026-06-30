@@ -97,6 +97,7 @@
           <th class="text-right">{$_('quantity')}</th>
           <th class="text-right">{$_('price')}</th>
           <th class="text-right">{$_('tradeAmount')}</th>
+          <th class="text-center">{$_('remark')}</th>
           <th class="text-center">{$_('action')}</th>
         </tr>
       </thead>
@@ -123,6 +124,9 @@
             </td>
             <td class="text-right font-mono text-sm">
               {formatAmount(trade.amount)}
+            </td>
+            <td class="max-w-[200px] truncate px-4 text-center text-sm text-gray-500" title={trade.note}>
+              {trade.note || '-'}
             </td>
             <td class="text-center">
               <button
