@@ -114,12 +114,6 @@
           on:priceUpdated={handlePositionUpdated} />
       </div>
 
-      <div class="mb-6" id="trade-form-component">
-        <TradeForm
-          assetType={selectedAccount.type}
-          on:created={handleTradeCreated} />
-      </div>
-
       <div class="mb-6">
         <TradeHistory
           {trades}
@@ -129,6 +123,12 @@
           loading={loadingTrades}
           on:deleted={handleTradeDeleted}
           on:pageChange={handlePageChange} />
+      </div>
+
+      <div class="mb-6" id="trade-form-component">
+        <TradeForm
+          assetType={selectedAccount.type}
+          on:created={handleTradeCreated} />
       </div>
     {:else}
       <div class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-400">
