@@ -8,7 +8,7 @@
 
   const dispatch = createEventDispatcher()
 
-  export let assetType = ''
+  export let assetId: number | string = ''
 
   let tradeType = 'BUY'
   let securitySymbol = ''
@@ -62,7 +62,7 @@
 
     submitting = true
     try {
-      await createTrade(assetType, {
+      await createTrade(assetId, {
         type: tradeType,
         security_symbol: securitySymbol.trim(),
         security_name: securityName.trim(),

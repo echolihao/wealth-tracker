@@ -11,7 +11,7 @@
 
   export let positions: any[] = []
   export let loading = false
-  export let assetType = ''
+  export let assetId: number | string = ''
 
   let editingSymbol: string | null = null
   let editingPrice: string = ''
@@ -87,7 +87,7 @@
     }
     const newAmount = newPrice * Number(position.quantity)
     try {
-      await updatePositionPrice(assetType, position.security_symbol, {
+      await updatePositionPrice(assetId, position.security_symbol, {
         current_price: newPrice,
         amount: newAmount,
       })
@@ -105,6 +105,7 @@
 
   const handleKeydown = (e: KeyboardEvent, position: any) => {
     if (e.key === 'Enter') {
+      e.stopPropagation() // 阻止冒泡到 td 的 keydown handler，避免 startEditPrice 重置 editingPrice
       savePrice(position)
     }
     if (e.key === 'Escape') {

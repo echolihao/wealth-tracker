@@ -138,7 +138,7 @@
         <PositionsTable
           {positions}
           loading={loadingPositions}
-          assetType={selectedAccount.type}
+          assetId={selectedAccount.id}
           on:sell={handleSell}
           on:priceUpdated={handlePositionUpdated} />
       </div>
@@ -162,7 +162,7 @@
 
       <div class="mb-6" id="trade-form-component">
         <TradeForm
-          assetType={selectedAccount.type}
+          assetId={selectedAccount.id}
           on:created={handleTradeCreated} />
       </div>
     {:else}
