@@ -43,6 +43,17 @@
     })
   }
 
+  const formatPnl = (value: any) => {
+    const v = Number(value ?? 0)
+    return (
+      (v > 0 ? '+' : '') +
+      v.toLocaleString('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    )
+  }
+
   const startEditPrice = (position: any) => {
     editingSymbol = position.security_symbol
     editingPrice = String(position.current_price ?? '')
@@ -176,8 +187,7 @@
             <tr>
               <th>{$_('securitySymbol')}</th>
               <th>{$_('securityName')}</th>
-              <th class="text-right">{$_('costPrice')}</th>
-              <th class="text-right">{$_('tradeAmount')}</th>
+              <th class="text-right">{$_('profitLoss')}</th>
             </tr>
           </thead>
           <tbody>
@@ -185,8 +195,9 @@
               <tr class="text-gray-400">
                 <td class="font-mono text-sm">{position.security_symbol}</td>
                 <td>{position.security_name}</td>
-                <td class="text-right font-mono text-sm">{formatPrice(position.cost_price)}</td>
-                <td class="text-right font-mono text-sm">{formatAmount(position.amount)}</td>
+                <td class="text-right font-mono text-sm" class:text-green-600={position.realized_pnl > 0} class:text-red-600={position.realized_pnl < 0}>
+                  {formatPnl(position.realized_pnl)}
+                </td>
               </tr>
             {/each}
           </tbody>
