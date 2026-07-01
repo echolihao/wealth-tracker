@@ -95,7 +95,7 @@
           <th class="text-right">{$_('quantity')}</th>
           <th class="text-right">{$_('costPrice')}</th>
           <th class="text-right">{$_('currentPrice')}</th>
-          <th class="text-right">{$_('tradeAmount')}</th>
+          <th class="text-right">{$_('marketValue')}</th>
           <th class="text-right">{$_('profitLoss')}</th>
           <th class="text-center">{$_('action')}</th>
         </tr>

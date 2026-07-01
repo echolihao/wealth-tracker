@@ -239,6 +239,7 @@
   "price": "単価",
   "tradeDate": "取引日",
   "tradeAmount": "取引金額",
+  "marketValue": "時価",
   "costPrice": "取得単価",
   "currentPrice": "現在値",
   "profitLoss": "損益",
