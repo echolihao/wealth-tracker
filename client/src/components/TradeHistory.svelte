@@ -17,6 +17,7 @@
   export let size = 10
   export let loading = false
   export let assetType = ''
+  export let assetId: number | string = ''
   export let showImportButton = false
 
   let localStartDate = ''
@@ -356,7 +357,7 @@
 {/if}
 
 <BatchImport
-  {assetType}
+  assetId={assetId || assetType}
   show={showBatchImport}
   on:imported={() => {
     showBatchImport = false

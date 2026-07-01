@@ -7,7 +7,7 @@
 
   const dispatch = createEventDispatcher()
 
-  export let assetType = ''
+  export let assetId: number | string = ''
   export let show = false
 
   let selectedFile: File | null = null
@@ -51,7 +51,7 @@
     importing = true
     result = null
     try {
-      const res: any = await importTrades(assetType, selectedFile)
+      const res: any = await importTrades(assetId, selectedFile)
       result = res
       if (res.success) {
         notice.set(

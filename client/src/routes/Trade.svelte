@@ -45,7 +45,7 @@
     if (!selectedAccount) return
     loadingPositions = true
     try {
-      positions = (await getPositions(selectedAccount.type)) || []
+      positions = (await getPositions(selectedAccount.id)) || []
     } catch (error) {
       console.error('Error fetching positions:', error)
       notice.set('Failed to load positions')
@@ -66,7 +66,7 @@
       if (searchEndDate) params.endDate = searchEndDate
       if (searchType) params.type = searchType
       if (searchSymbol) params.symbol = searchSymbol
-      const result: any = await getTrades(selectedAccount.type, params)
+      const result: any = await getTrades(selectedAccount.id, params)
       trades = result.data || []
       tradeTotal = result.total || 0
     } catch (error) {
@@ -151,6 +151,7 @@
           size={tradeSize}
           loading={loadingTrades}
           assetType={selectedAccount.type}
+          assetId={selectedAccount.id}
           showImportButton={true}
           on:deleted={handleTradeDeleted}
           on:pageChange={handlePageChange}
