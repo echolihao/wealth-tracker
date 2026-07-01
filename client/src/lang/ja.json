@@ -275,5 +275,7 @@
   "noFileSelected": "ファイルが選択されていません",
   "assetType": "資産タイプ",
   "cash": "現金",
-  "investment": "投資"
+  "investment": "投資",
+  "currentTotalPnl": "現在の保有損益",
+  "allTotalPnl": "全保有損益"
 }

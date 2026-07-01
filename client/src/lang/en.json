@@ -275,5 +275,7 @@
   "noFileSelected": "No file selected",
   "assetType": "Asset Type",
   "cash": "Cash",
-  "investment": "Investment"
+  "investment": "Investment",
+  "currentTotalPnl": "Current Total P&L",
+  "allTotalPnl": "Overall Total P&L"
 }

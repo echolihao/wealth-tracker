@@ -275,5 +275,7 @@
   "noFileSelected": "Aucun fichier sélectionné",
   "assetType": "Type d'actif",
   "cash": "Liquidités",
-  "investment": "Investissement"
+  "investment": "Investissement",
+  "currentTotalPnl": "P&L actuel total",
+  "allTotalPnl": "P&L total global"
 }

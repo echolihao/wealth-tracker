@@ -17,6 +17,17 @@
   let editingPrice: string = ''
   let showClosed = false
 
+  $: totalOpenPnl = openPositions.reduce((sum, p) => {
+    const unrealized =
+      (Number(p.current_price ?? 0) - Number(p.cost_price ?? 0)) *
+      Number(p.quantity ?? 0)
+    return sum + unrealized + Number(p.realized_pnl ?? 0)
+  }, 0)
+
+  $: totalAllPnl =
+    totalOpenPnl +
+    closedPositions.reduce((sum, p) => sum + Number(p.realized_pnl ?? 0), 0)
+
   $: openPositions = positions.filter((p: any) => p.status === 'Open')
   $: closedPositions = positions
     .filter((p: any) => p.status === 'Closed')
@@ -234,6 +245,28 @@
           </tbody>
         </Table>
       {/if}
+
+      <!-- Summary: total P&L -->
+      <div class="mt-4 flex items-center gap-8 border-t border-gray-200 pt-3 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">{$_('currentTotalPnl') || '当前持仓总盈亏'}:</span>
+          <span
+            class="font-mono font-medium"
+            class:text-red-600={totalOpenPnl > 0}
+            class:text-green-600={totalOpenPnl < 0}>
+            {formatPnl(totalOpenPnl)}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">{$_('allTotalPnl') || '全部持仓总盈亏'}:</span>
+          <span
+            class="font-mono font-medium"
+            class:text-red-600={totalAllPnl > 0}
+            class:text-green-600={totalAllPnl < 0}>
+            {formatPnl(totalAllPnl)}
+          </span>
+        </div>
+      </div>
     {/if}
   {/if}
 </div>

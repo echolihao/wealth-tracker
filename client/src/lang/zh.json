@@ -275,5 +275,7 @@
   "noFileSelected": "未选择文件",
   "assetType": "资产类型",
   "cash": "现金",
-  "investment": "投资"
+  "investment": "投资",
+  "currentTotalPnl": "当前持仓总盈亏",
+  "allTotalPnl": "全部持仓总盈亏"
 }
