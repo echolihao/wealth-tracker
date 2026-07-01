@@ -37,6 +37,13 @@
     })
   }
 
+  const formatIntAmount = (value: any) => {
+    return Number(value).toLocaleString('zh-CN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
+  }
+
   const handleDelete = (trade: any) => {
     deleteTarget = trade
     showDeleteConfirm = true
@@ -252,7 +259,7 @@
               {formatAmount(trade.price)}
             </td>
             <td class="text-right font-mono text-sm">
-              {formatAmount(trade.amount)}
+              {formatIntAmount(trade.amount)}
             </td>
             <td class="max-w-[200px] truncate px-4 text-center text-sm text-gray-500" title={trade.note}>
               {trade.note || '-'}

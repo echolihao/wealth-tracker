@@ -28,6 +28,14 @@
     })
   }
 
+  const formatAmount = (value: any) => {
+    if (value === null || value === undefined) return '-'
+    return Number(value).toLocaleString('zh-CN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
+  }
+
   const formatQty = (value: any) => {
     return Number(value).toLocaleString('zh-CN', {
       minimumFractionDigits: 0,
@@ -126,7 +134,7 @@
                 <span class="cursor-pointer hover:text-brand">{formatPrice(position.current_price)}</span>
               {/if}
             </td>
-            <td class="text-right font-mono text-sm">{formatPrice(position.amount)}</td>
+            <td class="text-right font-mono text-sm">{formatAmount(position.amount)}</td>
             <td class="text-right font-mono text-sm">
               {#if position.current_price != null && position.cost_price != null}
                 {@const unrealizedPnl = (Number(position.current_price) - Number(position.cost_price)) * Number(position.quantity)}
@@ -178,7 +186,7 @@
                 <td class="font-mono text-sm">{position.security_symbol}</td>
                 <td>{position.security_name}</td>
                 <td class="text-right font-mono text-sm">{formatPrice(position.cost_price)}</td>
-                <td class="text-right font-mono text-sm">{formatPrice(position.amount)}</td>
+                <td class="text-right font-mono text-sm">{formatAmount(position.amount)}</td>
               </tr>
             {/each}
           </tbody>
