@@ -37,7 +37,7 @@
   let isShowComfirmModal: boolean = false
   let isShowResetModal: boolean = false
   let isShowChart: boolean = false
-  let typeToBeDestroyed: string = ''
+  let assetIdToBeDestroyed: number | null = null
 
   // 添加响应式声明，当原始数据或货币相关 store 变化时更新转换后的数组
   $: if (rawRecordsArr.length > 0 && $targetCurrencyCode) {
@@ -85,7 +85,7 @@
 
   const handleAdd = () => {
     currentAssetItem = deepClone(DEFAULT_ACCOUNT_ITEM)
-    currentAssetItem.type = Date.now().toString()
+    // DEFAULT_ACCOUNT_ITEM 已默认使用 'CASH' 类型
     updateActionType = ACTION_TYPES.create
     isShowUpdateModal = true
     trackEvent('asset-add-click')
@@ -99,10 +99,10 @@
   }
 
   const handleDestroy = (event) => {
-    const { type } = event.detail
-    typeToBeDestroyed = type
+    const { id } = event.detail
+    assetIdToBeDestroyed = id
     isShowComfirmModal = true
-    trackEvent('asset-delete-click', { asset_type: type })
+    trackEvent('asset-delete-click', { asset_type: id })
   }
 
   const handleReset = () => {
@@ -120,11 +120,13 @@
   }
 
   const handleComfirm = async () => {
+    if (assetIdToBeDestroyed == null) return
     try {
-      await destroyAssets({ type: typeToBeDestroyed })
-      trackEvent('asset-delete', { asset_type: typeToBeDestroyed })
+      await destroyAssets({ id: assetIdToBeDestroyed })
+      trackEvent('asset-delete', { asset_id: assetIdToBeDestroyed })
       fetchDatabase()
       isShowComfirmModal = false
+      assetIdToBeDestroyed = null
     } catch (error) {
       console.error('Error destroy assets:', error)
     }
