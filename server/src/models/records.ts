@@ -10,8 +10,8 @@ Record.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    type: {
-      type: DataTypes.TEXT,
+    asset_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     alias: {

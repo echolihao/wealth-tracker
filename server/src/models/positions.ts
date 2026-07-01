@@ -10,8 +10,8 @@ Position.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    asset_type: {
-      type: DataTypes.STRING,
+    asset_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     security_symbol: {
@@ -70,7 +70,7 @@ Position.init(
     indexes: [
       {
         unique: true,
-        fields: ['asset_type', 'security_symbol'],
+        fields: ['asset_id', 'security_symbol'],
       },
     ],
   },

@@ -10,8 +10,8 @@ Trade.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    asset_type: {
-      type: DataTypes.STRING,
+    asset_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     security_symbol: {

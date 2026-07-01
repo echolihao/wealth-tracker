@@ -5,15 +5,22 @@ export class Assets extends Model {}
 
 Assets.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     type: {
       type: DataTypes.STRING,
       allowNull: false,
-      primaryKey: true,
-      unique: true,
+      validate: {
+        isIn: [['CASH', 'INVESTMENT']],
+      },
     },
     alias: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
+      unique: true,
     },
     amount: {
       type: DataTypes.DECIMAL(10, 2),
