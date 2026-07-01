@@ -36,6 +36,11 @@ export const ASSETS_RISK_ARR = RISK_TYPES.map((value) => ({
   value: value,
 }))
 
+export const ASSETS_TYPE_ARR = [
+  { key: 'cash', value: 'CASH' },
+  { key: 'investment', value: 'INVESTMENT' },
+]
+
 export const LIQUIDITY_TYPES = ['GOOD', 'MIDDLE', 'POOR']
 
 export const ASSETS_LIQUIDITY_ARR = LIQUIDITY_TYPES.map((value) => ({
@@ -44,7 +49,7 @@ export const ASSETS_LIQUIDITY_ARR = LIQUIDITY_TYPES.map((value) => ({
 }))
 
 export const DEFAULT_ACCOUNT_ITEM = {
-  type: Date.now().toString(),
+  type: 'CASH',
   alias: '',
   currency: 'CNY',
   risk: RISK_TYPES[0],

@@ -12,6 +12,7 @@ export interface RecordsItem {
 }
 
 export interface AssetsItem {
+  id?: number
   type: string
   alias: string
   amount: number
