@@ -212,7 +212,6 @@
             <tr>
               <th>{$_('securitySymbol')}</th>
               <th>{$_('securityName')}</th>
-              <th class="text-right">{$_('quantity')}</th>
               <th class="text-center">{$_('openDate')}</th>
               <th class="text-center">{$_('closeDate')}</th>
               <th class="text-center">{$_('holdingDays')}</th>
@@ -224,7 +223,6 @@
               <tr class="text-gray-400">
                 <td class="font-mono text-sm">{position.security_symbol}</td>
                 <td>{position.security_name}</td>
-                <td class="text-right">{formatQty(position.quantity)}</td>
                 <td class="text-center text-sm">{formatDate(position.open_date)}</td>
                 <td class="text-center text-sm">{formatDate(position.close_date)}</td>
                 <td class="text-center text-sm">{getHoldingDays(position)}</td>
