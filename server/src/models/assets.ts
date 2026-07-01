@@ -1,7 +1,20 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from './index'
 
-export class Assets extends Model {}
+export class Assets extends Model {
+  declare id: number
+  declare type: string
+  declare alias: string
+  declare amount: number
+  declare note: string
+  declare risk: string
+  declare liquidity: string
+  declare tags: string
+  declare currency: string
+  declare datetime: string
+  declare created: Date
+  declare updated: Date
+}
 
 Assets.init(
   {

@@ -1,7 +1,20 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from './index'
 
-export class Trade extends Model {}
+export class Trade extends Model {
+  declare id: number
+  declare asset_id: number
+  declare security_symbol: string
+  declare security_name: string
+  declare type: string
+  declare quantity: number
+  declare price: number
+  declare amount: number
+  declare trade_date: string
+  declare note: string
+  declare realized_pnl: number | null
+  declare created: Date
+}
 
 Trade.init(
   {

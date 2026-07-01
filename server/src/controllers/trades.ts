@@ -8,12 +8,7 @@ import { Trade } from '../models/trades'
 export const getSecuritiesAccounts = async (_, reply) => {
   try {
     const data = await Assets.findAll({
-      where: {
-        [Op.or]: [
-          { type: { [Op.startsWith]: 'securities:' } },
-          { alias: { [Op.startsWith]: 'securities:' } },
-        ],
-      },
+      where: { type: 'INVESTMENT' },
     })
     return reply.send(data)
   } catch (error: any) {
@@ -25,10 +20,10 @@ export const getSecuritiesAccounts = async (_, reply) => {
 }
 
 export const getPositions = async (request, reply) => {
-  const { assetType } = request.params
+  const { id } = request.params
   try {
     const data = await Position.findAll({
-      where: { asset_type: assetType },
+      where: { asset_id: id },
       order: [['created', 'ASC']],
     })
     return reply.send(data)
@@ -41,12 +36,12 @@ export const getPositions = async (request, reply) => {
 }
 
 export const updatePositionPrice = async (request, reply) => {
-  const { assetType, symbol } = request.params
+  const { id, symbol } = request.params
   const { current_price, amount } = request.body
   try {
     const result = await sequelize.transaction(async (t) => {
       const position = await Position.findOne({
-        where: { asset_type: assetType, security_symbol: symbol },
+        where: { asset_id: id, security_symbol: symbol },
         transaction: t,
       })
       if (!position) {
@@ -60,11 +55,11 @@ export const updatePositionPrice = async (request, reply) => {
         updateData.amount = amount
       }
       await Position.update(updateData, {
-        where: { asset_type: assetType, security_symbol: symbol },
+        where: { asset_id: id, security_symbol: symbol },
         transaction: t,
       })
       const updated = await Position.findOne({
-        where: { asset_type: assetType, security_symbol: symbol },
+        where: { asset_id: id, security_symbol: symbol },
         transaction: t,
       })
       return updated
@@ -79,11 +74,11 @@ export const updatePositionPrice = async (request, reply) => {
 }
 
 export const getTrades = async (request, reply) => {
-  const { assetType } = request.params
+  const { id } = request.params
   const { page = 1, size = 10, startDate, endDate, type, symbol } = request.query
   try {
     const offset = (page - 1) * size
-    const whereClause: any = { asset_type: assetType }
+    const whereClause: any = { asset_id: id }
 
     if (startDate) {
       whereClause.trade_date = { ...whereClause.trade_date, [Op.gte]: startDate }
@@ -119,21 +114,17 @@ export const getTrades = async (request, reply) => {
 }
 
 export const createTrade = async (request, reply) => {
-  const { assetType } = request.params
+  const { id } = request.params
   const params = request.body
 
-  if (!assetType) {
+  if (!id) {
     return reply.code(400).send({
       statusCode: 400,
-      message: 'Asset type is required.',
+      message: 'Asset id is required.',
     })
   }
-  const account = await Assets.findByPk(assetType)
-  const isSecurities =
-    account &&
-    (account.type.startsWith('securities:') ||
-      account.alias?.startsWith('securities:'))
-  if (!isSecurities) {
+  const account = await Assets.findByPk(id)
+  if (!account || account.type !== 'INVESTMENT') {
     return reply.code(400).send({
       statusCode: 400,
       message: 'Invalid securities account type.',
@@ -190,7 +181,7 @@ export const createTrade = async (request, reply) => {
       // 0. Look up existing position for realized_pnl calculation
       const existing = await Position.findOne({
         where: {
-          asset_type: assetType,
+          asset_id: id,
           security_symbol: params.security_symbol,
         },
         transaction: t,
@@ -201,7 +192,7 @@ export const createTrade = async (request, reply) => {
       // 1. Create trade record
       const trade = await Trade.create(
         {
-          asset_type: assetType,
+          asset_id: id,
           security_symbol: params.security_symbol,
           security_name: params.security_name,
           type: params.type,
@@ -244,7 +235,7 @@ export const createTrade = async (request, reply) => {
         } else {
           await Position.create(
             {
-              asset_type: assetType,
+              asset_id: id,
               security_symbol: params.security_symbol,
               security_name: params.security_name,
               quantity,
@@ -328,13 +319,13 @@ export const updateTrade = async (request, reply) => {
 
       // Query position state before applying new trade (for realized_pnl calculation)
       const posBefore = await Position.findOne({
-        where: { asset_type: oldTrade.asset_type, security_symbol: newSymbol },
+        where: { asset_id: oldTrade.asset_id, security_symbol: newSymbol },
         transaction: t,
       })
       const costPriceBefore = posBefore ? Number(posBefore.cost_price) : newPrice
 
       await applyTradeEffect(
-        oldTrade.asset_type,
+        oldTrade.asset_id,
         newType,
         newSymbol,
         newName,
@@ -396,13 +387,13 @@ export const deleteTrade = async (request, reply) => {
 
 // Helper: reverse a trade's effect on positions
 async function reverseTradeEffect(trade: any, t: any) {
-  const assetType = trade.asset_type
+  const assetId = trade.asset_id
   const symbol = trade.security_symbol
   const qty = Number(trade.quantity)
   const price = Number(trade.price)
 
   const existing = await Position.findOne({
-    where: { asset_type: assetType, security_symbol: symbol },
+    where: { asset_id: assetId, security_symbol: symbol },
     transaction: t,
   })
 
@@ -462,7 +453,7 @@ async function reverseTradeEffect(trade: any, t: any) {
       const currentPrice = price
       await Position.create(
         {
-          asset_type: assetType,
+          asset_id: assetId,
           security_symbol: symbol,
           security_name: trade.security_name,
           quantity: qty,
@@ -482,7 +473,7 @@ async function reverseTradeEffect(trade: any, t: any) {
 
 // Helper: apply a trade's effect on positions
 async function applyTradeEffect(
-  assetType: string,
+  assetId: number,
   type: string,
   symbol: string,
   name: string,
@@ -492,7 +483,7 @@ async function applyTradeEffect(
   existingPosition?: any,
 ) {
   const existing = existingPosition || await Position.findOne({
-    where: { asset_type: assetType, security_symbol: symbol },
+    where: { asset_id: assetId, security_symbol: symbol },
     transaction: t,
   })
 
@@ -519,7 +510,7 @@ async function applyTradeEffect(
     } else {
       await Position.create(
         {
-          asset_type: assetType,
+          asset_id: assetId,
           security_symbol: symbol,
           security_name: name,
           quantity,
@@ -567,22 +558,18 @@ async function applyTradeEffect(
 }
 
 export const importTrades = async (request, reply) => {
-  const { assetType } = request.params
+  const { id } = request.params
 
-  if (!assetType) {
+  if (!id) {
     return reply.code(400).send({
       statusCode: 400,
-      message: 'Asset type is required.',
+      message: 'Asset id is required.',
     })
   }
 
   // Validate account is securities account
-  const account = await Assets.findByPk(assetType)
-  const isSecurities =
-    account &&
-    (account.type.startsWith('securities:') ||
-      account.alias?.startsWith('securities:'))
-  if (!isSecurities) {
+  const account = await Assets.findByPk(id)
+  if (!account || account.type !== 'INVESTMENT') {
     return reply.code(400).send({
       statusCode: 400,
       message: 'Invalid securities account type.',
@@ -753,13 +740,13 @@ export const importTrades = async (request, reply) => {
       for (const v of validated) {
         // Look up position BEFORE applyTradeEffect for correct cost_price
         const posBefore = await Position.findOne({
-          where: { asset_type: assetType, security_symbol: v.security_symbol },
+          where: { asset_id: id, security_symbol: v.security_symbol },
           transaction: t,
         })
         const costPrice = posBefore ? Number(posBefore.cost_price) : v.price
 
         await applyTradeEffect(
-          assetType,
+          id,
           v.type,
           v.security_symbol,
           v.security_name,
@@ -771,7 +758,7 @@ export const importTrades = async (request, reply) => {
 
         await Trade.create(
           {
-            asset_type: assetType,
+            asset_id: id,
             security_symbol: v.security_symbol,
             security_name: v.security_name,
             type: v.type,

@@ -1,7 +1,20 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from './index'
 
-export class Position extends Model {}
+export class Position extends Model {
+  declare id: number
+  declare asset_id: number
+  declare security_symbol: string
+  declare security_name: string
+  declare quantity: number
+  declare cost_price: number
+  declare current_price: number | null
+  declare amount: number
+  declare realized_pnl: number
+  declare status: string
+  declare created: Date
+  declare updated: Date
+}
 
 Position.init(
   {
