@@ -64,6 +64,7 @@
   "untaggedAssets": "Untagged Assets",
   "recordHasBeendestroyed": "This record has been successfully deleted",
   "recordDetails": "Record Details",
+  "tradeHistory": "Trade History",
   "lastDays": "Last {count} Days",
   "lowFrequencyTip": "Above are low-frequency update content",
   "placeholderOfRemark": "Please enter a remark",

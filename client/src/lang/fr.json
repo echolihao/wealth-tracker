@@ -64,6 +64,7 @@
   "untaggedAssets": "Actifs non étiquetés",
   "recordHasBeendestroyed": "Cet enregistrement a été supprimé avec succès",
   "recordDetails": "Détails de l'enregistrement",
+  "tradeHistory": "Historique des transactions",
   "lastDays": "Les {count} derniers jours",
   "lowFrequencyTip": "Ci-dessus sont les contenus à mise à jour peu fréquente",
   "placeholderOfRemark": "Veuillez saisir une remarque",

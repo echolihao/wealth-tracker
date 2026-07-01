@@ -64,6 +64,7 @@
   "untaggedAssets": "タグなし資産",
   "recordHasBeendestroyed": "このレコードは正常に削除されました",
   "recordDetails": "記録の詳細",
+  "tradeHistory": "取引履歴",
   "lastDays": "過去{count}日間",
   "lowFrequencyTip": "上記は低頻度更新コンテンツです",
   "placeholderOfRemark": "備考を入力してください",

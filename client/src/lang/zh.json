@@ -64,6 +64,7 @@
   "untaggedAssets": "未打标签资产",
   "recordHasBeendestroyed": "该记录已成功销毁",
   "recordDetails": "记录详情",
+  "tradeHistory": "交易历史",
   "lastDays": "最近 {count} 天",
   "lowFrequencyTip": "以上为低频更新内容",
   "placeholderOfRemark": "请填写备注",

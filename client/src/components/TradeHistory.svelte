@@ -50,6 +50,8 @@
     }
   }
 
+  export let pageSizes = [10, 20, 50, 100]
+
   const handlePrevious = () => {
     if (page > 1) {
       dispatch('pageChange', page - 1)
@@ -62,17 +64,48 @@
     }
   }
 
-  $: pages = assemblePagination(totalPages, page)
+  const handlePageClick = (event: CustomEvent) => {
+    const pageNum = Number(event.detail)
+    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+      dispatch('pageChange', pageNum)
+    }
+  }
 
-  const assemblePagination = (total: number, current: number): LinkType[] => {
+  const handleSizeChange = (event: Event) => {
+    const target = event.target as HTMLSelectElement
+    dispatch('pageSizeChange', Number(target.value))
+  }
+
+  $: pages = buildPagination(totalPages, page)
+
+  const buildPagination = (total: number, current: number, maxVisible = 7): LinkType[] => {
     if (total <= 1) return []
     const items: LinkType[] = []
-    for (let i = 1; i <= total; i++) {
-      items.push({
-        name: `${i}`,
-        active: i === current,
-        href: '',
-      })
+
+    if (total <= maxVisible) {
+      for (let i = 1; i <= total; i++) {
+        items.push({ name: `${i}`, active: i === current, href: '' })
+      }
+    } else {
+      items.push({ name: `${1}`, active: 1 === current, href: '' })
+      let start = Math.max(2, current - 2)
+      let end = Math.min(total - 1, current + 2)
+      if (current <= 3) {
+        end = Math.min(total - 1, maxVisible - 1)
+      }
+      if (current >= total - 2) {
+        start = Math.max(2, total - maxVisible + 2)
+      }
+      if (start > 2) {
+        items.push({ name: '...', active: false, href: '' })
+      }
+      for (let i = start; i <= end; i++) {
+        items.push({ name: `${i}`, active: i === current, href: '' })
+      }
+      if (end < total - 1) {
+        items.push({ name: '...', active: false, href: '' })
+      }
+      items.push({ name: `${total}`, active: total === current, href: '' })
     }
     return items
   }
@@ -80,7 +113,7 @@
 
 <div class="w-full">
   <div class="mb-3 flex items-center justify-between">
-    <h3 class="text-base font-medium">{$_('recordDetails')}</h3>
+    <h3 class="text-base font-medium">{$_('tradeHistory')}</h3>
     {#if showImportButton}
       <button
         on:click={() => (showBatchImport = true)}
@@ -155,12 +188,13 @@
     </Table>
 
     {#if totalPages > 1}
-      <div class="mt-4 flex justify-center">
+      <div class="mt-4 flex flex-wrap items-center justify-center gap-4">
         <Pagination
           {pages}
           large
           on:previous={handlePrevious}
           on:next={handleNext}
+          on:click={handlePageClick}
           activeClass="text-brand">
           <svelte:fragment slot="prev">
             <span class="sr-only">Previous</span>
@@ -171,6 +205,25 @@
             <SvgIcon name="chevron-right" />
           </svelte:fragment>
         </Pagination>
+        <select
+          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          on:change={handleSizeChange}
+          value={size}>
+          {#each pageSizes as s}
+            <option value={s}>{s} 条/页</option>
+          {/each}
+        </select>
+      </div>
+    {:else if total > 10}
+      <div class="mt-4 flex justify-center">
+        <select
+          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          on:change={handleSizeChange}
+          value={size}>
+          {#each pageSizes as s}
+            <option value={s}>{s} 条/页</option>
+          {/each}
+        </select>
       </div>
     {/if}
   {/if}

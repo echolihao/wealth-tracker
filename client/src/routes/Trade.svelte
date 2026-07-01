@@ -81,6 +81,12 @@
     fetchTrades()
   }
 
+  const handlePageSizeChange = (event: CustomEvent) => {
+    tradeSize = event.detail
+    tradePage = 1
+    fetchTrades()
+  }
+
   const handleSell = (event: CustomEvent) => {
     // Forward sell data to TradeForm component
     const tradeForm = document.querySelector('#trade-form-component') as any
@@ -125,6 +131,7 @@
           showImportButton={true}
           on:deleted={handleTradeDeleted}
           on:pageChange={handlePageChange}
+          on:pageSizeChange={handlePageSizeChange}
           on:imported={handleTradeCreated} />
       </div>
 
