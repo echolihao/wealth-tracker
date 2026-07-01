@@ -9,7 +9,7 @@ export const create = async (request, reply) => {
   try {
     const options = {
       type: params.type,
-      alias: params.alias || params.type,
+      alias: params.alias,
       amount: params.amount,
       currency: params.currency,
       note: params.note,
@@ -20,7 +20,10 @@ export const create = async (request, reply) => {
       updated: new Date(),
     }
     const assets = await Assets.create(options)
-    await Record.create(assets.dataValues)
+    await Record.create({
+      ...assets.dataValues,
+      asset_id: assets.get('id'),
+    })
     return reply.send(assets)
   } catch (error: any) {
     return reply.code(400).send({
@@ -47,7 +50,6 @@ export const update = async (request, reply) => {
   const now = new Date()
   try {
     const options = {
-      type: params.type,
       alias: params.alias,
       amount: params.amount,
       currency: params.currency,
@@ -60,10 +62,11 @@ export const update = async (request, reply) => {
       updated: now,
     }
     const data = await Assets.update(options, {
-      where: { type: params.type },
+      where: { id: params.id },
     })
     await Record.create({
       ...options,
+      asset_id: params.id,
       created: now,
     })
     return reply.send(data)
@@ -76,13 +79,13 @@ export const update = async (request, reply) => {
 }
 
 export const destroy = async (request, reply) => {
-  const { type = '' } = request?.body
+  const { id = null } = request?.body
   try {
     await sequelize.transaction(async (t) => {
-      await Trade.destroy({ where: { asset_type: type }, transaction: t })
-      await Position.destroy({ where: { asset_type: type }, transaction: t })
-      await Assets.destroy({ where: { type }, transaction: t })
-      await Record.destroy({ where: { type }, transaction: t })
+      await Trade.destroy({ where: { asset_id: id }, transaction: t })
+      await Position.destroy({ where: { asset_id: id }, transaction: t })
+      await Record.destroy({ where: { asset_id: id }, transaction: t })
+      await Assets.destroy({ where: { id }, transaction: t })
     })
     return reply.send({ result: true })
   } catch (error: any) {
