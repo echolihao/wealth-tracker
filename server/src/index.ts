@@ -16,57 +16,6 @@ const ensureDatabaseDirectory = async (dbPath: string) => {
   await fs.mkdir(path.dirname(dbPath), { recursive: true })
 }
 
-// Backward-safe SQLite migration: sequelize.sync() never adds columns to
-// existing tables, so new columns must be added explicitly via ALTER TABLE.
-const hasColumn = async (table: string, column: string) => {
-  if (!sequelize) {
-    return false
-  }
-
-  const [results] = await sequelize.query(`PRAGMA table_info(${table})`)
-  return results.some((row: any) => row.name === column)
-}
-
-// Convert legacy kind=LIABILITY rows (positive amount) back to negative amounts.
-const migrateKindToSignBasedAmounts = async () => {
-  if (!sequelize) {
-    return
-  }
-
-  for (const table of ['assets', 'record']) {
-    if (!(await hasColumn(table, 'kind'))) {
-      continue
-    }
-
-    const [result] = await sequelize.query(
-      `UPDATE ${table} SET amount = -ABS(amount) WHERE kind = 'LIABILITY' AND amount > 0`,
-    )
-    const changes = (result as { changes?: number }).changes ?? 0
-    if (changes > 0) {
-      console.log(`Migrated ${changes} legacy liability rows in ${table} to negative amounts`)
-    }
-  }
-}
-
-const addColumnIfNotExists = async (table: string, column: string, definition: string) => {
-  if (!sequelize) {
-    return
-  }
-
-  try {
-    const [results] = await sequelize.query(`PRAGMA table_info(${table})`)
-    const hasColumn = results.some((row: any) => row.name === column)
-
-    if (!hasColumn) {
-      console.log(`Adding ${column} column to ${table} table...`)
-      await sequelize.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
-      console.log(`✅ ${column} column added to ${table} table successfully!`)
-    }
-  } catch (err) {
-    console.error(`Error adding ${column} column to ${table} table:`, err)
-  }
-}
-
 const connectToSqlite = async () => {
   if (!sequelize) {
     throw new Error('Sequelize has not been initialized.')
@@ -74,12 +23,14 @@ const connectToSqlite = async () => {
 
   try {
     await ensureDatabaseDirectory(getRuntimeOptions().dbPath)
+
+    // 重建 assets / record / position / trade 四表（按外键依赖顺序 DROP）
+    const tablesToRebuild = ['trades', 'positions', 'record', 'assets']
+    for (const table of tablesToRebuild) {
+      await sequelize.query(`DROP TABLE IF EXISTS "${table}"`)
+    }
+
     await sequelize.sync()
-    await addColumnIfNotExists('assets', 'tags', "TEXT DEFAULT ''")
-    await addColumnIfNotExists('record', 'tags', "TEXT DEFAULT ''")
-    await addColumnIfNotExists('positions', 'realized_pnl', "DECIMAL(14,2) NOT NULL DEFAULT 0")
-    await addColumnIfNotExists('trades', 'realized_pnl', 'DECIMAL(14,2)')
-    await migrateKindToSignBasedAmounts()
     console.log('🎊 Database synced!')
   } catch (err) {
     console.error('Failed to sync database:', err)
