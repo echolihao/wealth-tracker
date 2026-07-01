@@ -109,7 +109,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each openPositions as position (position.security_symbol)}
+        {#each openPositions as position (position.id)}
           <tr class="hover:bg-gray-50">
             <td class="font-mono text-sm">{position.security_symbol}</td>
             <td>{position.security_name}</td>
@@ -181,7 +181,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each closedPositions as position (position.security_symbol)}
+            {#each closedPositions as position (position.id)}
               <tr class="text-gray-400">
                 <td class="font-mono text-sm">{position.security_symbol}</td>
                 <td>{position.security_name}</td>
