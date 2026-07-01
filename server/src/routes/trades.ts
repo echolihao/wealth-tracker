@@ -17,22 +17,22 @@ export default [
   },
   {
     method: 'GET',
-    url: '/api/assets/:assetType/positions',
+    url: '/api/assets/:id/positions',
     handler: getPositions,
   },
   {
     method: 'PUT',
-    url: '/api/assets/:assetType/positions/:symbol',
+    url: '/api/assets/:id/positions/:symbol',
     handler: updatePositionPrice,
   },
   {
     method: 'GET',
-    url: '/api/assets/:assetType/trades',
+    url: '/api/assets/:id/trades',
     handler: getTrades,
   },
   {
     method: 'POST',
-    url: '/api/assets/:assetType/trades',
+    url: '/api/assets/:id/trades',
     handler: createTrade,
   },
   {
@@ -47,7 +47,7 @@ export default [
   },
   {
     method: 'POST',
-    url: '/api/assets/:assetType/trades/import',
+    url: '/api/assets/:id/trades/import',
     handler: importTrades,
   },
 ]
