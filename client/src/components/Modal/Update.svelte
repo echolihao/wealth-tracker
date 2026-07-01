@@ -12,6 +12,7 @@
     ACTION_TYPES,
     ASSETS_RISK_ARR,
     ASSETS_LIQUIDITY_ARR,
+    ASSETS_TYPE_ARR,
     DEFAULT_ACCOUNT_ITEM,
     getAllCurrencies,
   } from './../../helper/constant'
@@ -61,6 +62,11 @@
   }))
 
   $: localizedLiquidityArr = ASSETS_LIQUIDITY_ARR.map((item) => ({
+    name: $_(item.key),
+    value: item.value,
+  }))
+
+  $: localizedTypeArr = ASSETS_TYPE_ARR.map((item) => ({
     name: $_(item.key),
     value: item.value,
   }))
@@ -193,6 +199,14 @@
   const handleLiquiditySelect = (event) => {
     items.liquidity = event.detail.value
   }
+
+  const genTypeActive = (type) => {
+    return ASSETS_TYPE_ARR.findIndex((item) => item.value === type)
+  }
+
+  const handleTypeSelect = (event) => {
+    items.type = event.detail.value
+  }
 </script>
 
 <div
@@ -230,6 +244,18 @@
             class="custom-input"
             placeholder={$_('placeholderOfAlias')}
             required />
+        </div>
+        <div class="module-warp">
+          <label for="update-currency" class="custom-label">
+            {$_('assetType')}
+          </label>
+          <div class="w-full">
+            <CustomSelect
+              options={localizedTypeArr}
+              active={genTypeActive(items.type)}
+              listboxClass="w-full"
+              on:selected={handleTypeSelect} />
+          </div>
         </div>
         <div class="module-warp">
           <label for="update-currency" class="custom-label">
