@@ -189,8 +189,12 @@
     </Table>
 
     {#if totalPages > 1}
-      <div class="mt-4 flex flex-wrap items-center justify-center gap-4">
-        <Pagination
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <span class="text-sm text-gray-500">
+          共 {total} 条
+        </span>
+        <div class="flex items-center gap-4">
+          <Pagination
           {pages}
           large
           on:previous={handlePrevious}
@@ -214,6 +218,7 @@
             <option value={s}>{s} 条/页</option>
           {/each}
         </select>
+        </div>
       </div>
     {:else if total > 10}
       <div class="mt-4 flex justify-center">
