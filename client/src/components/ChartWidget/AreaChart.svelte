@@ -73,7 +73,7 @@
 
   const regenAreaOptions = (assetsArr) => {
     const sortedAssetsArr = sortByDatetime(assetsArr)
-    const splitAssetsArr = groupArrayByType(sortedAssetsArr)
+    const splitAssetsArr = groupArrayByType(sortedAssetsArr, 'alias')
     const series = genChartSeries(splitAssetsArr)
     options.series = series
     const categories = generateDatesArray($extent.value)

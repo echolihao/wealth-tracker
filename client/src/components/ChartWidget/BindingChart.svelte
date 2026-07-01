@@ -119,11 +119,11 @@
 
     // 根据账户筛选
     if (selectedAccount !== 'ALL') {
-      filteredAssetsArr = filteredAssetsArr.filter((asset) => asset.type === selectedAccount)
+      filteredAssetsArr = filteredAssetsArr.filter((asset) => asset.alias === selectedAccount)
     }
 
     const sortedAssetsArr = sortByDatetime(filteredAssetsArr)
-    const splitAssetsArr = groupArrayByType(sortedAssetsArr)
+    const splitAssetsArr = groupArrayByType(sortedAssetsArr, 'alias')
     const seriesDataArr = genChartSeries(splitAssetsArr)
     const series = deepClone(options.series)
     series[0].data = calculateColumnSums(seriesDataArr)
