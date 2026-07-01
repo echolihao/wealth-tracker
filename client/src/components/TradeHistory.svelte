@@ -23,7 +23,7 @@
   let deleteTarget: any = null
   let showBatchImport = false
 
-  const totalPages = Math.ceil(total / size)
+  $: totalPages = Math.ceil(total / size)
 
   const formatAmount = (value: any) => {
     return Number(value).toLocaleString('zh-CN', {
@@ -64,8 +64,9 @@
     }
   }
 
-  const handlePageClick = (event: CustomEvent) => {
-    const pageNum = Number(event.detail)
+  const handlePageClick = (event: Event) => {
+    const target = event.target as HTMLElement
+    const pageNum = Number(target.textContent?.trim())
     if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
       dispatch('pageChange', pageNum)
     }
