@@ -13,7 +13,7 @@ const BACKUP_VERSION = 1
 // Stable dedupe key for an asset snapshot, tolerant to Date/string created values.
 const genRecordKey = (item: any) => {
   const created = item.created ? new Date(item.created).getTime() : 0
-  return [item.type, item.datetime, Number(item.amount), item.currency, created].join('|')
+  return [item.asset_id, item.datetime, Number(item.amount), item.currency, created].join('|')
 }
 
 const normalizeImportedAmount = (item: any) => {
@@ -71,20 +71,34 @@ export const importData = async (request, reply) => {
 
     if (Array.isArray(data.assets)) {
       for (const item of data.assets) {
-        if (!item?.type || item.amount === undefined) continue
-        await Assets.upsert({
-          type: String(item.type),
-          alias: item.alias || String(item.type),
-          amount: normalizeImportedAmount(item),
-          currency: item.currency || 'CNY',
-          note: item.note || '',
-          risk: item.risk || 'LOW',
-          liquidity: item.liquidity || 'GOOD',
-          tags: item.tags || '',
-          datetime: item.datetime,
-          created: item.created || new Date(),
-          updated: new Date(),
-        })
+        if (!item?.alias || item.amount === undefined) continue
+        const existing = await Assets.findOne({ where: { alias: item.alias } })
+        if (existing) {
+          await existing.update({
+            amount: normalizeImportedAmount(item),
+            currency: item.currency || 'CNY',
+            note: item.note || '',
+            risk: item.risk || 'LOW',
+            liquidity: item.liquidity || 'GOOD',
+            tags: item.tags || '',
+            datetime: item.datetime,
+            updated: new Date(),
+          })
+        } else {
+          await Assets.create({
+            type: 'CASH',
+            alias: item.alias,
+            amount: normalizeImportedAmount(item),
+            currency: item.currency || 'CNY',
+            note: item.note || '',
+            risk: item.risk || 'LOW',
+            liquidity: item.liquidity || 'GOOD',
+            tags: item.tags || '',
+            datetime: item.datetime,
+            created: item.created || new Date(),
+            updated: new Date(),
+          })
+        }
         counts.assets += 1
       }
     }
@@ -93,7 +107,7 @@ export const importData = async (request, reply) => {
       const existing = await Record.findAll({ raw: true })
       const existingKeys = new Set(existing.map(genRecordKey))
       const newRecords = data.records
-        .filter((item: any) => item?.type && item.amount !== undefined && item.datetime)
+        .filter((item: any) => item?.asset_id && item.amount !== undefined && item.datetime)
         .filter((item: any) => {
           const key = genRecordKey(item)
           if (existingKeys.has(key)) return false
@@ -101,8 +115,8 @@ export const importData = async (request, reply) => {
           return true
         })
         .map((item: any) => ({
-          type: String(item.type),
-          alias: item.alias || String(item.type),
+          asset_id: item.asset_id,
+          alias: item.alias || String(item.asset_id),
           amount: normalizeImportedAmount(item),
           currency: item.currency || 'CNY',
           note: item.note || '',
@@ -189,10 +203,10 @@ export const importData = async (request, reply) => {
 
     if (Array.isArray(data.positions)) {
       for (const item of data.positions) {
-        if (!item?.asset_type || !item?.security_symbol) continue
+        if (!item?.asset_id || !item?.security_symbol) continue
         await Position.upsert({
           id: item.id,
-          asset_type: item.asset_type,
+          asset_id: item.asset_id,
           security_symbol: item.security_symbol,
           security_name: item.security_name,
           quantity: item.quantity || 0,
@@ -209,11 +223,11 @@ export const importData = async (request, reply) => {
 
     if (Array.isArray(data.trades)) {
       for (const item of data.trades) {
-        if (!item?.asset_type || !item?.security_symbol) continue
+        if (!item?.asset_id || !item?.security_symbol) continue
         const existing = await Trade.findOne({ where: { id: item.id } })
         if (!existing) {
           await Trade.create({
-            asset_type: item.asset_type,
+            asset_id: item.asset_id,
             security_symbol: item.security_symbol,
             security_name: item.security_name,
             type: item.type,
