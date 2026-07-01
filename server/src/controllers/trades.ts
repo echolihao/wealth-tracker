@@ -80,11 +80,26 @@ export const updatePositionPrice = async (request, reply) => {
 
 export const getTrades = async (request, reply) => {
   const { assetType } = request.params
-  const { page = 1, size = 10 } = request.query
+  const { page = 1, size = 10, startDate, endDate, type, symbol } = request.query
   try {
     const offset = (page - 1) * size
+    const whereClause: any = { asset_type: assetType }
+
+    if (startDate) {
+      whereClause.trade_date = { ...whereClause.trade_date, [Op.gte]: startDate }
+    }
+    if (endDate) {
+      whereClause.trade_date = { ...whereClause.trade_date, [Op.lte]: endDate }
+    }
+    if (type) {
+      whereClause.type = type
+    }
+    if (symbol) {
+      whereClause.security_symbol = { [Op.like]: `%${symbol}%` }
+    }
+
     const { count, rows } = await Trade.findAndCountAll({
-      where: { asset_type: assetType },
+      where: whereClause,
       order: [['trade_date', 'DESC'], ['created', 'DESC']],
       offset,
       limit: size,

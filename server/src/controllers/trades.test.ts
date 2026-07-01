@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { Op } from 'sequelize'
 
 // ── Mock modules before any imports ──────────────────────────────────────────
 // vi.mock factories are hoisted; vi.hoisted() values are hoisted even higher,
@@ -321,6 +322,45 @@ describe('getTrades', () => {
     )
 
     expect(reply.code).toHaveBeenCalledWith(400)
+  })
+
+  it('should filter by type parameter', async () => {
+    mockTradeFindAndCountAll.mockResolvedValue({ count: 1, rows: [{ id: 1, type: 'BUY' }] })
+    const reply = mockReply()
+
+    await tradesCtrl.getTrades(
+      {
+        params: { assetType: 'securities:ibkr' },
+        query: { page: '1', size: '10', type: 'BUY' },
+      } as any,
+      reply,
+    )
+
+    expect(mockTradeFindAndCountAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ type: 'BUY' }),
+      }),
+    )
+  })
+
+  it('should filter by symbol parameter (like search)', async () => {
+    mockTradeFindAndCountAll.mockResolvedValue({ count: 1, rows: [{ id: 1, security_symbol: 'AAPL' }] })
+    const reply = mockReply()
+
+    await tradesCtrl.getTrades(
+      {
+        params: { assetType: 'securities:ibkr' },
+        query: { page: '1', size: '10', symbol: 'AAPL' },
+      } as any,
+      reply,
+    )
+
+    const call = mockTradeFindAndCountAll.mock.calls[0][0]
+    const securitySymbolFilter = call.where.security_symbol
+    expect(securitySymbolFilter).toBeDefined()
+    // Op.like should be '%AAPL%'
+    const likeVal = securitySymbolFilter[Op.like]
+    expect(likeVal).toBe('%AAPL%')
   })
 })
 

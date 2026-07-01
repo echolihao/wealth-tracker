@@ -20,6 +20,10 @@
   let tradeSize = 10
   let loadingPositions = false
   let loadingTrades = false
+  let searchStartDate = ''
+  let searchEndDate = ''
+  let searchType = ''
+  let searchSymbol = ''
 
   onMount(() => {
     updatePageMetaInfo({
@@ -30,6 +34,10 @@
   const handleAccountSelect = async (event: CustomEvent) => {
     selectedAccount = event.detail
     tradePage = 1
+    searchStartDate = ''
+    searchEndDate = ''
+    searchType = ''
+    searchSymbol = ''
     await Promise.all([fetchPositions(), fetchTrades()])
   }
 
@@ -50,10 +58,15 @@
     if (!selectedAccount) return
     loadingTrades = true
     try {
-      const result = await getTrades(selectedAccount.type, {
+      const params: any = {
         page: tradePage,
         size: tradeSize,
-      })
+      }
+      if (searchStartDate) params.startDate = searchStartDate
+      if (searchEndDate) params.endDate = searchEndDate
+      if (searchType) params.type = searchType
+      if (searchSymbol) params.symbol = searchSymbol
+      const result: any = await getTrades(selectedAccount.type, params)
       trades = result.data || []
       tradeTotal = result.total || 0
     } catch (error) {
@@ -83,6 +96,16 @@
 
   const handlePageSizeChange = (event: CustomEvent) => {
     tradeSize = event.detail
+    tradePage = 1
+    fetchTrades()
+  }
+
+  const handleSearchChange = (event: CustomEvent) => {
+    const { startDate, endDate, type, symbol } = event.detail
+    searchStartDate = startDate
+    searchEndDate = endDate
+    searchType = type
+    searchSymbol = symbol
     tradePage = 1
     fetchTrades()
   }
@@ -132,7 +155,8 @@
           on:deleted={handleTradeDeleted}
           on:pageChange={handlePageChange}
           on:pageSizeChange={handlePageSizeChange}
-          on:imported={handleTradeCreated} />
+          on:imported={handleTradeCreated}
+          on:searchChange={handleSearchChange} />
       </div>
 
       <div class="mb-6" id="trade-form-component">

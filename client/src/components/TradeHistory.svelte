@@ -19,6 +19,11 @@
   export let assetType = ''
   export let showImportButton = false
 
+  let localStartDate = ''
+  let localEndDate = ''
+  let localType = ''
+  let localSymbol = ''
+
   let showDeleteConfirm = false
   let deleteTarget: any = null
   let showBatchImport = false
@@ -77,6 +82,28 @@
     dispatch('pageSizeChange', Number(target.value))
   }
 
+  const handleSearch = () => {
+    dispatch('searchChange', {
+      startDate: localStartDate,
+      endDate: localEndDate,
+      type: localType,
+      symbol: localSymbol,
+    })
+  }
+
+  const handleResetSearch = () => {
+    localStartDate = ''
+    localEndDate = ''
+    localType = ''
+    localSymbol = ''
+    dispatch('searchChange', {
+      startDate: '',
+      endDate: '',
+      type: '',
+      symbol: '',
+    })
+  }
+
   $: pages = buildPagination(totalPages, page)
 
   const buildPagination = (total: number, current: number, maxVisible = 7): LinkType[] => {
@@ -115,13 +142,68 @@
 <div class="w-full">
   <div class="mb-3 flex items-center justify-between">
     <h3 class="text-base font-medium">{$_('tradeHistory')}</h3>
-    {#if showImportButton}
+    <div class="flex items-center gap-2">
+      {#if showImportButton}
+        <button
+          on:click={() => (showBatchImport = true)}
+          class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+          {$_('batchImport')}
+        </button>
+      {/if}
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div class="mb-3 flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <div>
+      <label for="search-start-date" class="mb-0.5 block text-xs text-gray-500">{$_('startDate')}</label>
+      <input
+        id="search-start-date"
+        type="date"
+        bind:value={localStartDate}
+        class="rounded border border-gray-300 px-2 py-1.5 text-sm" />
+    </div>
+    <div class="pb-1 text-sm text-gray-400">~</div>
+    <div>
+      <label for="search-end-date" class="mb-0.5 block text-xs text-gray-500">{$_('endDate')}</label>
+      <input
+        id="search-end-date"
+        type="date"
+        bind:value={localEndDate}
+        class="rounded border border-gray-300 px-2 py-1.5 text-sm" />
+    </div>
+    <div>
+      <label for="search-type" class="mb-0.5 block text-xs text-gray-500">{$_('action')}</label>
+      <select
+        id="search-type"
+        bind:value={localType}
+        class="rounded border border-gray-300 px-2 py-1.5 text-sm">
+        <option value="">{$_('all')}</option>
+        <option value="BUY">{$_('buy')}</option>
+        <option value="SELL">{$_('sell')}</option>
+      </select>
+    </div>
+    <div>
+      <label for="search-symbol" class="mb-0.5 block text-xs text-gray-500">{$_('securitySymbol')}</label>
+      <input
+        id="search-symbol"
+        type="text"
+        bind:value={localSymbol}
+        placeholder="{$_('securitySymbol')}"
+        class="w-28 rounded border border-gray-300 px-2 py-1.5 text-sm" />
+    </div>
+    <div class="flex items-center gap-1">
       <button
-        on:click={() => (showBatchImport = true)}
-        class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
-        {$_('batchImport')}
+        on:click={handleSearch}
+        class="rounded bg-brand px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
+        {$_('search')}
       </button>
-    {/if}
+      <button
+        on:click={handleResetSearch}
+        class="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100">
+        {$_('reset')}
+      </button>
+    </div>
   </div>
 
   {#if loading}
