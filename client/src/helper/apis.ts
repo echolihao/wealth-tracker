@@ -16,7 +16,7 @@ export const updateAssets = (data) => {
   return $ajax.put(genApiPath('assets'), data)
 }
 
-export const destroyAssets = (data) => {
+export const destroyAssets = (data: { id: number }) => {
   return $ajax.delete(genApiPath('assets'), data)
 }
 
@@ -128,24 +128,20 @@ export const getSecuritiesAccounts = () => {
   return $ajax.get(genApiPath('trades/securities-accounts'), {})
 }
 
-export const getPositions = (assetType: string) => {
-  return $ajax.get(genApiPath(`assets/${assetType}/positions`), {})
+export const getPositions = (id: number) => {
+  return $ajax.get(genApiPath(`assets/${id}/positions`), {})
 }
 
-export const updatePositionPrice = (
-  assetType: string,
-  symbol: string,
-  data: { current_price?: number; amount?: number },
-) => {
-  return $ajax.put(genApiPath(`assets/${assetType}/positions/${symbol}`), data)
+export const updatePositionPrice = (id: number, symbol: string, data: any) => {
+  return $ajax.put(genApiPath(`assets/${id}/positions/${symbol}`), data)
 }
 
-export const getTrades = (assetType: string, data = {}) => {
-  return $ajax.get(genApiPath(`assets/${assetType}/trades`), data)
+export const getTrades = (id: number, params?: any) => {
+  return $ajax.get(genApiPath(`assets/${id}/trades`), params)
 }
 
-export const createTrade = (assetType: string, data: any) => {
-  return $ajax.post(genApiPath(`assets/${assetType}/trades`), data)
+export const createTrade = (id: number, data: any) => {
+  return $ajax.post(genApiPath(`assets/${id}/trades`), data)
 }
 
 export const updateTrade = (id: number, data: any) => {
@@ -156,8 +152,8 @@ export const deleteTrade = (id: number) => {
   return $ajax.delete(genApiPath(`trades/${id}`), {})
 }
 
-export const importTrades = (assetType: string, file: File) => {
-  const formData = new FormData()
-  formData.append('file', file)
-  return $ajax.post(genApiPath(`assets/${assetType}/trades/import`), formData)
+export const importTrades = (id: number, data: FormData) => {
+  return $ajax.post(genApiPath(`assets/${id}/trades/import`), data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
 }
