@@ -82,7 +82,6 @@ Position.init(
     timestamps: false,
     indexes: [
       {
-        unique: true,
         fields: ['asset_id', 'security_symbol'],
       },
     ],

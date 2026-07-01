@@ -41,7 +41,7 @@ export const updatePositionPrice = async (request, reply) => {
   try {
     const result = await sequelize.transaction(async (t) => {
       const position = await Position.findOne({
-        where: { asset_id: id, security_symbol: symbol },
+        where: { asset_id: id, security_symbol: symbol, status: 'Open' },
         transaction: t,
       })
       if (!position) {
@@ -55,11 +55,11 @@ export const updatePositionPrice = async (request, reply) => {
         updateData.amount = amount
       }
       await Position.update(updateData, {
-        where: { asset_id: id, security_symbol: symbol },
+        where: { id: position.id },
         transaction: t,
       })
       const updated = await Position.findOne({
-        where: { asset_id: id, security_symbol: symbol },
+        where: { id: position.id },
         transaction: t,
       })
       return updated
@@ -183,6 +183,7 @@ export const createTrade = async (request, reply) => {
         where: {
           asset_id: id,
           security_symbol: params.security_symbol,
+          status: 'Open',
         },
         transaction: t,
       })
@@ -213,7 +214,8 @@ export const createTrade = async (request, reply) => {
       // 2. Update position
 
       if (params.type === 'BUY') {
-        if (existing) {
+        if (existing && Number(existing.quantity) > 0) {
+          // Existing open position: weighted average update
           const oldQty = Number(existing.quantity)
           const oldCost = Number(existing.cost_price)
           const newQty = oldQty + quantity
@@ -233,6 +235,7 @@ export const createTrade = async (request, reply) => {
             { transaction: t },
           )
         } else {
+          // No open position exists — create a new one
           await Position.create(
             {
               asset_id: id,
@@ -242,6 +245,7 @@ export const createTrade = async (request, reply) => {
               cost_price: price,
               current_price: price,
               amount: quantity * price,
+              realized_pnl: 0,
               status: 'Open',
               created: new Date(),
               updated: new Date(),
@@ -319,7 +323,7 @@ export const updateTrade = async (request, reply) => {
 
       // Query position state before applying new trade (for realized_pnl calculation)
       const posBefore = await Position.findOne({
-        where: { asset_id: oldTrade.asset_id, security_symbol: newSymbol },
+        where: { asset_id: oldTrade.asset_id, security_symbol: newSymbol, status: 'Open' },
         transaction: t,
       })
       const costPriceBefore = posBefore ? Number(posBefore.cost_price) : newPrice
@@ -394,6 +398,7 @@ async function reverseTradeEffect(trade: any, t: any) {
 
   const existing = await Position.findOne({
     where: { asset_id: assetId, security_symbol: symbol },
+    order: [['id', 'DESC']],
     transaction: t,
   })
 
@@ -483,12 +488,13 @@ async function applyTradeEffect(
   existingPosition?: any,
 ) {
   const existing = existingPosition || await Position.findOne({
-    where: { asset_id: assetId, security_symbol: symbol },
+    where: { asset_id: assetId, security_symbol: symbol, status: 'Open' },
     transaction: t,
   })
 
   if (type === 'BUY') {
-    if (existing) {
+    if (existing && Number(existing.quantity) > 0) {
+      // Existing open position: weighted average update
       const oldQty = Number(existing.quantity)
       const oldCost = Number(existing.cost_price)
       const newQty = oldQty + quantity
@@ -508,6 +514,7 @@ async function applyTradeEffect(
         { transaction: t },
       )
     } else {
+      // No open position exists — create a new one
       await Position.create(
         {
           asset_id: assetId,
@@ -517,6 +524,7 @@ async function applyTradeEffect(
           cost_price: price,
           current_price: price,
           amount: quantity * price,
+          realized_pnl: 0,
           status: 'Open',
           created: new Date(),
           updated: new Date(),
@@ -740,7 +748,7 @@ export const importTrades = async (request, reply) => {
       for (const v of validated) {
         // Look up position BEFORE applyTradeEffect for correct cost_price
         const posBefore = await Position.findOne({
-          where: { asset_id: id, security_symbol: v.security_symbol },
+          where: { asset_id: id, security_symbol: v.security_symbol, status: 'Open' },
           transaction: t,
         })
         const costPrice = posBefore ? Number(posBefore.cost_price) : v.price

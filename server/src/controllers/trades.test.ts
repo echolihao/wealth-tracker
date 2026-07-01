@@ -27,6 +27,7 @@ const mockPositionFindAll = vi.hoisted(() => vi.fn())
 const mockPositionFindOne = vi.hoisted(() => vi.fn())
 const mockPositionUpdate = vi.hoisted(() => vi.fn())
 const mockPositionCreate = vi.hoisted(() => vi.fn())
+const mockPositionDestroy = vi.hoisted(() => vi.fn())
 
 vi.mock('../models/positions', () => ({
   Position: {
@@ -34,6 +35,7 @@ vi.mock('../models/positions', () => ({
     findOne: mockPositionFindOne,
     update: mockPositionUpdate,
     create: (...args: any[]) => mockPositionCreate(...args),
+    destroy: (...args: any[]) => mockPositionDestroy(...args),
   },
 }))
 
@@ -704,6 +706,32 @@ describe('createTrade', () => {
       expect(reply.code().send).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'Position not found for sell.' }),
       )
+    })
+
+    it('should create a new position when BUY on a symbol with only Closed positions', async () => {
+      mockTradeCreate.mockResolvedValue(makeTradeInstance())
+      // No Open position found (Closed positions are not returned)
+      mockPositionFindOne.mockResolvedValue(null)
+      const reply = mockReply()
+
+      await tradesCtrl.createTrade(makeRequest({ price: 180, amount: 1800 }) as any, reply)
+
+      // Should create a fresh position record
+      expect(mockPositionCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          asset_id: 1,
+          security_symbol: 'AAPL',
+          quantity: 10,
+          cost_price: 180,
+          current_price: 180,
+          amount: 1800,
+          realized_pnl: 0,
+          status: 'Open',
+        }),
+        { transaction: mockT },
+      )
+      // Old Closed position records are untouched
+      expect(mockPositionDestroy).not.toHaveBeenCalled()
     })
 
     it('should handle database errors', async () => {
