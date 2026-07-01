@@ -61,7 +61,7 @@ export const update = async (request, reply) => {
       tags: params.tags || '',
       updated: now,
     }
-    const data = await Assets.update(options, {
+    await Assets.update(options, {
       where: { id: params.id },
     })
     await Record.create({
@@ -69,7 +69,7 @@ export const update = async (request, reply) => {
       asset_id: params.id,
       created: now,
     })
-    return reply.send(data)
+    return reply.send({ success: true })
   } catch (error: any) {
     return reply.code(400).send({
       statusCode: 400,
