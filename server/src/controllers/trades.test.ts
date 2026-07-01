@@ -80,7 +80,7 @@ function makePositionInstance(overrides: Record<string, any> = {}) {
 function makeTradeInstance(overrides: Record<string, any> = {}) {
   return {
     id: 1,
-    asset_type: 'securities:test',
+    asset_id: 1,
     security_symbol: 'AAPL',
     security_name: 'Apple Inc.',
     type: 'BUY',
@@ -112,27 +112,19 @@ beforeEach(() => {
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 describe('getSecuritiesAccounts', () => {
-  it('should return securities accounts', async () => {
+  it('should return INVESTMENT type accounts', async () => {
     const accounts = [
-      { type: 'securities:ibkr', amount: 10000 },
-      { type: 'securities:binance', amount: 5000 },
+      { type: 'INVESTMENT', alias: 'IBKR', amount: 10000 },
+      { type: 'INVESTMENT', alias: 'Binance', amount: 5000 },
     ]
     mockAssetsFindAll.mockResolvedValue(accounts)
     const reply = mockReply()
 
     await tradesCtrl.getSecuritiesAccounts({} as any, reply)
 
-    // Verify the find call includes Op.or with Op.startsWith — matching
-    // Sequelize Symbol operators requires a flexible assertion
-    expect(mockAssetsFindAll).toHaveBeenCalledTimes(1)
-    const args = mockAssetsFindAll.mock.calls[0][0]
-    expect(args).toHaveProperty('where')
-    // Check the actual structure without relying on Symbol comparison
-    const where = args.where
-    const orClauses = where[Object.getOwnPropertySymbols(where)[0]]
-    expect(Array.isArray(orClauses)).toBe(true)
-    expect(orClauses).toHaveLength(2)
-
+    expect(mockAssetsFindAll).toHaveBeenCalledWith({
+      where: { type: 'INVESTMENT' },
+    })
     expect(reply.send).toHaveBeenCalledWith(accounts)
   })
 
@@ -151,20 +143,20 @@ describe('getSecuritiesAccounts', () => {
 })
 
 describe('getPositions', () => {
-  it('should return positions for an asset type', async () => {
+  it('should return positions for an asset id', async () => {
     const positions = [
-      { asset_type: 'securities:ibkr', security_symbol: 'AAPL' },
+      { asset_id: 1, security_symbol: 'AAPL' },
     ]
     mockPositionFindAll.mockResolvedValue(positions)
     const reply = mockReply()
 
     await tradesCtrl.getPositions(
-      { params: { assetType: 'securities:ibkr' } } as any,
+      { params: { id: 1 } } as any,
       reply,
     )
 
     expect(mockPositionFindAll).toHaveBeenCalledWith({
-      where: { asset_type: 'securities:ibkr' },
+      where: { asset_id: 1 },
       order: [['created', 'ASC']],
     })
     expect(reply.send).toHaveBeenCalledWith(positions)
@@ -175,7 +167,7 @@ describe('getPositions', () => {
     const reply = mockReply()
 
     await tradesCtrl.getPositions(
-      { params: { assetType: 'securities:ibkr' } } as any,
+      { params: { id: 1 } } as any,
       reply,
     )
 
@@ -185,13 +177,13 @@ describe('getPositions', () => {
 
 describe('updatePositionPrice', () => {
   const defaultRequest = {
-    params: { assetType: 'securities:ibkr', symbol: 'AAPL' },
+    params: { id: 1, symbol: 'AAPL' },
     body: { current_price: 160, amount: 1600 },
   }
 
   it('should update position price and amount', async () => {
     const pos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
       quantity: 10,
       cost_price: 150,
@@ -217,11 +209,11 @@ describe('updatePositionPrice', () => {
 
   it('should only update amount when current_price is omitted', async () => {
     const req = {
-      params: { assetType: 'securities:ibkr', symbol: 'AAPL' },
+      params: { id: 1, symbol: 'AAPL' },
       body: { amount: 2000 },
     }
     const pos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
     })
     mockPositionFindOne.mockResolvedValue(pos)
@@ -274,7 +266,7 @@ describe('getTrades', () => {
 
     await tradesCtrl.getTrades(
       {
-        params: { assetType: 'securities:ibkr' },
+        params: { id: 1 },
         query: { page: '2', size: '5' },
       } as any,
       reply,
@@ -282,7 +274,7 @@ describe('getTrades', () => {
 
     // query params arrive as strings; controller passes them directly
     expect(mockTradeFindAndCountAll).toHaveBeenCalledWith({
-      where: { asset_type: 'securities:ibkr' },
+      where: { asset_id: 1 },
       order: [['trade_date', 'DESC'], ['created', 'DESC']],
       offset: 5,
       limit: '5',
@@ -301,7 +293,7 @@ describe('getTrades', () => {
 
     await tradesCtrl.getTrades(
       {
-        params: { assetType: 'securities:ibkr' },
+        params: { id: 1 },
         query: {},
       } as any,
       reply,
@@ -317,7 +309,7 @@ describe('getTrades', () => {
     const reply = mockReply()
 
     await tradesCtrl.getTrades(
-      { params: { assetType: 'securities:ibkr' }, query: {} } as any,
+      { params: { id: 1 }, query: {} } as any,
       reply,
     )
 
@@ -330,7 +322,7 @@ describe('getTrades', () => {
 
     await tradesCtrl.getTrades(
       {
-        params: { assetType: 'securities:ibkr' },
+        params: { id: 1 },
         query: { page: '1', size: '10', type: 'BUY' },
       } as any,
       reply,
@@ -349,7 +341,7 @@ describe('getTrades', () => {
 
     await tradesCtrl.getTrades(
       {
-        params: { assetType: 'securities:ibkr' },
+        params: { id: 1 },
         query: { page: '1', size: '10', symbol: 'AAPL' },
       } as any,
       reply,
@@ -377,13 +369,13 @@ describe('createTrade', () => {
 
   function makeRequest(overrides: Record<string, any> = {}) {
     return {
-      params: { assetType: 'securities:ibkr' },
+      params: { id: 1 },
       body: { ...validBody, ...overrides },
     }
   }
 
   describe('validation', () => {
-    it('should reject missing asset type', async () => {
+    it('should reject missing asset id', async () => {
       const req = { params: {}, body: validBody }
       const reply = mockReply()
 
@@ -391,12 +383,12 @@ describe('createTrade', () => {
 
       expect(reply.code).toHaveBeenCalledWith(400)
       expect(reply.code().send).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'Asset type is required.' }),
+        expect.objectContaining({ message: 'Asset id is required.' }),
       )
     })
 
     it('should reject non-securities account', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'cash', alias: null })
+      mockAssetsFindByPk.mockResolvedValue({ id: 2, type: 'CASH' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest() as any, reply)
@@ -408,7 +400,7 @@ describe('createTrade', () => {
     })
 
     it('should reject missing trade type', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest({ type: '' }) as any, reply)
@@ -420,7 +412,7 @@ describe('createTrade', () => {
     })
 
     it('should reject invalid trade type', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest({ type: 'HOLD' }) as any, reply)
@@ -432,7 +424,7 @@ describe('createTrade', () => {
     })
 
     it('should reject missing security symbol', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest({ security_symbol: '' }) as any, reply)
@@ -444,7 +436,7 @@ describe('createTrade', () => {
     })
 
     it('should reject non-positive quantity', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest({ quantity: 0 }) as any, reply)
@@ -456,7 +448,7 @@ describe('createTrade', () => {
     })
 
     it('should reject non-positive price', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest({ price: -1 }) as any, reply)
@@ -468,7 +460,7 @@ describe('createTrade', () => {
     })
 
     it('should reject amount that does not equal quantity × price', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest({ amount: 9999 }) as any, reply)
@@ -480,7 +472,7 @@ describe('createTrade', () => {
     })
 
     it('should reject missing trade date', async () => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest({ trade_date: '' }) as any, reply)
@@ -490,26 +482,11 @@ describe('createTrade', () => {
         expect.objectContaining({ message: 'Trade date is required.' }),
       )
     })
-
-    it('should accept alias match for securities account', async () => {
-      mockAssetsFindByPk.mockResolvedValue({
-        type: 'investment',
-        alias: 'securities:ibkr',
-      })
-      mockTradeCreate.mockResolvedValue(makeTradeInstance())
-      mockPositionFindOne.mockResolvedValue(null)
-      const reply = mockReply()
-
-      await tradesCtrl.createTrade(makeRequest() as any, reply)
-
-      expect(reply.code).not.toHaveBeenCalledWith(400)
-      expect(mockTradeCreate).toHaveBeenCalled()
-    })
   })
 
   describe('trade execution', () => {
     beforeEach(() => {
-      mockAssetsFindByPk.mockResolvedValue({ type: 'securities:ibkr' })
+      mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
     })
 
     it('should create a BUY trade and a new position', async () => {
@@ -522,7 +499,7 @@ describe('createTrade', () => {
 
       expect(mockTradeCreate).toHaveBeenCalledWith(
         expect.objectContaining({
-          asset_type: 'securities:ibkr',
+          asset_id: 1,
           security_symbol: 'AAPL',
           type: 'BUY',
           quantity: 10,
@@ -533,7 +510,7 @@ describe('createTrade', () => {
       )
       expect(mockPositionCreate).toHaveBeenCalledWith(
         expect.objectContaining({
-          asset_type: 'securities:ibkr',
+          asset_id: 1,
           security_symbol: 'AAPL',
           quantity: 10,
           cost_price: 150,
@@ -548,7 +525,7 @@ describe('createTrade', () => {
 
     it('should update existing position on BUY with weighted average cost', async () => {
       const existingPos = makePositionInstance({
-        asset_type: 'securities:ibkr',
+        asset_id: 1,
         security_symbol: 'AAPL',
         quantity: 5,
         cost_price: 140,
@@ -576,7 +553,7 @@ describe('createTrade', () => {
     it('should handle SELL trade', async () => {
       const trade = makeTradeInstance({ type: 'SELL' })
       const existingPos = makePositionInstance({
-        asset_type: 'securities:ibkr',
+        asset_id: 1,
         security_symbol: 'AAPL',
         quantity: 15,
         cost_price: 140,
@@ -603,7 +580,7 @@ describe('createTrade', () => {
     it('should track realized_pnl on SELL trade record', async () => {
       const trade = makeTradeInstance({ type: 'SELL' })
       const existingPos = makePositionInstance({
-        asset_type: 'securities:ibkr',
+        asset_id: 1,
         security_symbol: 'AAPL',
         quantity: 15,
         cost_price: 140,
@@ -629,7 +606,7 @@ describe('createTrade', () => {
     it('should update position realized_pnl on SELL', async () => {
       const trade = makeTradeInstance({ type: 'SELL' })
       const existingPos = makePositionInstance({
-        asset_type: 'securities:ibkr',
+        asset_id: 1,
         security_symbol: 'AAPL',
         quantity: 15,
         cost_price: 140,
@@ -746,7 +723,7 @@ describe('createTrade', () => {
 describe('updateTrade', () => {
   const oldTrade = makeTradeInstance({
     id: 1,
-    asset_type: 'securities:ibkr',
+    asset_id: 1,
     type: 'BUY',
     security_symbol: 'AAPL',
     security_name: 'Apple Inc.',
@@ -774,7 +751,7 @@ describe('updateTrade', () => {
     // Position quantity must survive reverseTradeEffect (reverse BUY 10 → qty drops)
     // AND still allow applyTradeEffect (apply SELL 5 → needs enough remaining)
     const existingPos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
       quantity: 20,
       cost_price: 150,
@@ -819,7 +796,7 @@ describe('updateTrade', () => {
   it('should use old trade values for omitted fields', async () => {
     const updatedTrade = { ...oldTrade }
     const existingPos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
       quantity: 20,
       cost_price: 150,
@@ -863,7 +840,7 @@ describe('updateTrade', () => {
       price: 160,
     }
     const existingPos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
       quantity: 20,
       cost_price: 150,
@@ -904,7 +881,7 @@ describe('updateTrade', () => {
 describe('deleteTrade', () => {
   const trade = makeTradeInstance({
     id: 1,
-    asset_type: 'securities:ibkr',
+    asset_id: 1,
     type: 'BUY',
     quantity: 10,
     price: 150,
@@ -912,7 +889,7 @@ describe('deleteTrade', () => {
 
   it('should delete a trade and reverse its effect', async () => {
     const existingPos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
       quantity: 15,
       cost_price: 145,
@@ -966,7 +943,7 @@ describe('deleteTrade', () => {
 describe('reverseTradeEffect (via deleteTrade)', () => {
   it('should reverse a BUY trade and restore weighted average cost', async () => {
     const existingPos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
       quantity: 15,
       cost_price: 145,
@@ -1041,7 +1018,7 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
 
   it('should reverse a SELL trade, increase quantity and subtract realized_pnl', async () => {
     const existingPos = makePositionInstance({
-      asset_type: 'securities:ibkr',
+      asset_id: 1,
       security_symbol: 'AAPL',
       quantity: 5,
       cost_price: 145,
@@ -1084,7 +1061,7 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
 
     expect(mockPositionCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        asset_type: 'securities:test',
+        asset_id: 1,
         security_symbol: 'AAPL',
         quantity: 10,
         cost_price: 160,
