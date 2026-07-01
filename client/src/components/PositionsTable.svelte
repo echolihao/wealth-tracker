@@ -18,7 +18,13 @@
   let showClosed = false
 
   $: openPositions = positions.filter((p: any) => p.status === 'Open')
-  $: closedPositions = positions.filter((p: any) => p.status === 'Closed')
+  $: closedPositions = positions
+    .filter((p: any) => p.status === 'Closed')
+    .sort((a: any, b: any) => {
+      if (!a.close_date) return 1
+      if (!b.close_date) return -1
+      return b.close_date.localeCompare(a.close_date)
+    })
 
   const formatPrice = (value: any) => {
     if (value === null || value === undefined) return '-'
