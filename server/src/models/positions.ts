@@ -12,6 +12,8 @@ export class Position extends Model {
   declare amount: number
   declare realized_pnl: number
   declare status: string
+  declare open_date: string | null
+  declare close_date: string | null
   declare created: Date
   declare updated: Date
 }
@@ -58,6 +60,14 @@ Position.init(
       type: DataTypes.DECIMAL(14, 2),
       allowNull: false,
       defaultValue: 0,
+    },
+    open_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    close_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
     status: {
       type: DataTypes.STRING,

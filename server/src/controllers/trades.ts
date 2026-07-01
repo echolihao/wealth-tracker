@@ -247,6 +247,7 @@ export const createTrade = async (request, reply) => {
               amount: quantity * price,
               realized_pnl: 0,
               status: 'Open',
+              open_date: trade_date,
               created: new Date(),
               updated: new Date(),
             },
@@ -274,6 +275,7 @@ export const createTrade = async (request, reply) => {
         }
         if (newQty === 0) {
           updateData.status = 'Closed'
+          updateData.close_date = trade_date
           updateData.amount = 0
         } else {
           const currentPrice =
@@ -336,6 +338,7 @@ export const updateTrade = async (request, reply) => {
         newQty,
         newPrice,
         t,
+        newDate,
       )
 
       await Trade.update(
@@ -447,6 +450,7 @@ async function reverseTradeEffect(trade: any, t: any) {
         {
           quantity: newQty,
           status: 'Open',
+          close_date: null,
           amount: newQty * currentPrice,
           realized_pnl: Number(existing.realized_pnl ?? 0) - tradeRealizedPnl,
           updated: new Date(),
@@ -485,6 +489,7 @@ async function applyTradeEffect(
   quantity: number,
   price: number,
   t: any,
+  tradeDate?: string,
   existingPosition?: any,
 ) {
   const existing = existingPosition || await Position.findOne({
@@ -526,6 +531,7 @@ async function applyTradeEffect(
           amount: quantity * price,
           realized_pnl: 0,
           status: 'Open',
+          open_date: tradeDate || null,
           created: new Date(),
           updated: new Date(),
         },
@@ -553,6 +559,7 @@ async function applyTradeEffect(
     }
     if (newQty === 0) {
       updateData.status = 'Closed'
+      updateData.close_date = tradeDate || null
       updateData.amount = 0
     } else {
       const currentPrice =
@@ -761,6 +768,7 @@ export const importTrades = async (request, reply) => {
           v.quantity,
           v.price,
           t,
+          v.trade_date,
           posBefore,
         )
 

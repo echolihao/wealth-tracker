@@ -54,6 +54,20 @@
     )
   }
 
+  const formatDate = (value: any) => {
+    if (!value) return '-'
+    return String(value)
+  }
+
+  const getHoldingDays = (position: any) => {
+    const open = position.open_date
+    if (!open) return '-'
+    const start = new Date(open)
+    const end = position.close_date ? new Date(position.close_date) : new Date()
+    const days = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    return days >= 0 ? days : '-'
+  }
+
   const startEditPrice = (position: any) => {
     editingSymbol = position.security_symbol
     editingPrice = String(position.current_price ?? '')
@@ -116,6 +130,8 @@
           <th class="text-right">{$_('currentPrice')}</th>
           <th class="text-right">{$_('marketValue')}</th>
           <th class="text-right">{$_('profitLoss')}</th>
+          <th class="text-center">{$_('openDate')}</th>
+          <th class="text-center">{$_('holdingDays')}</th>
           <th class="text-center">{$_('action')}</th>
         </tr>
       </thead>
@@ -157,6 +173,8 @@
                 -
               {/if}
             </td>
+            <td class="text-center text-sm">{formatDate(position.open_date)}</td>
+            <td class="text-center text-sm">{getHoldingDays(position)}</td>
             <td class="text-center">
               <button
                 on:click={() => handleSell(position)}
@@ -187,6 +205,10 @@
             <tr>
               <th>{$_('securitySymbol')}</th>
               <th>{$_('securityName')}</th>
+              <th class="text-right">{$_('quantity')}</th>
+              <th class="text-center">{$_('openDate')}</th>
+              <th class="text-center">{$_('closeDate')}</th>
+              <th class="text-center">{$_('holdingDays')}</th>
               <th class="text-right">{$_('profitLoss')}</th>
             </tr>
           </thead>
@@ -195,6 +217,10 @@
               <tr class="text-gray-400">
                 <td class="font-mono text-sm">{position.security_symbol}</td>
                 <td>{position.security_name}</td>
+                <td class="text-right">{formatQty(position.quantity)}</td>
+                <td class="text-center text-sm">{formatDate(position.open_date)}</td>
+                <td class="text-center text-sm">{formatDate(position.close_date)}</td>
+                <td class="text-center text-sm">{getHoldingDays(position)}</td>
                 <td class="text-right font-mono text-sm" class:text-green-600={position.realized_pnl > 0} class:text-red-600={position.realized_pnl < 0}>
                   {formatPnl(position.realized_pnl)}
                 </td>
