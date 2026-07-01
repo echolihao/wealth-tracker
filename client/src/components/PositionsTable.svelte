@@ -173,7 +173,7 @@
                 {@const unrealizedPnl = (Number(position.current_price) - Number(position.cost_price)) * Number(position.quantity)}
                 {@const realizedPnl = Number(position.realized_pnl ?? 0)}
                 {@const totalPnl = unrealizedPnl + realizedPnl}
-                <span class:font-medium={true} class:text-green-600={totalPnl > 0} class:text-red-600={totalPnl < 0}
+                <span class:font-medium={true} class:text-red-600={totalPnl > 0} class:text-green-600={totalPnl < 0}
                   >{totalPnl > 0 ? '+' : ''}{totalPnl.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               {:else}
                 -
@@ -227,7 +227,7 @@
                 <td class="text-center text-sm">{formatDate(position.open_date)}</td>
                 <td class="text-center text-sm">{formatDate(position.close_date)}</td>
                 <td class="text-center text-sm">{getHoldingDays(position)}</td>
-                <td class="text-right font-mono text-sm" class:text-green-600={position.realized_pnl > 0} class:text-red-600={position.realized_pnl < 0}>
+                <td class="text-right font-mono text-sm" class:text-red-600={position.realized_pnl > 0} class:text-green-600={position.realized_pnl < 0}>
                   {formatPnl(position.realized_pnl)}
                 </td>
               </tr>
