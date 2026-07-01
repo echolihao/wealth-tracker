@@ -269,5 +269,8 @@
   "importFailed": "导入失败",
   "importDetails": "详情",
   "selectCsvFile": "请选择 CSV 文件",
-  "noFileSelected": "未选择文件"
+  "noFileSelected": "未选择文件",
+  "assetType": "资产类型",
+  "cash": "现金",
+  "investment": "投资"
 }

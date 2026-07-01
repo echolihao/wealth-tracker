@@ -269,5 +269,8 @@
   "importFailed": "インポートに失敗しました",
   "importDetails": "詳細",
   "selectCsvFile": "CSV ファイルを選択してください",
-  "noFileSelected": "ファイルが選択されていません"
+  "noFileSelected": "ファイルが選択されていません",
+  "assetType": "資産タイプ",
+  "cash": "現金",
+  "investment": "投資"
 }

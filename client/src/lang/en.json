@@ -269,5 +269,8 @@
   "importFailed": "Import Failed",
   "importDetails": "Details",
   "selectCsvFile": "Please select a CSV file",
-  "noFileSelected": "No file selected"
+  "noFileSelected": "No file selected",
+  "assetType": "Asset Type",
+  "cash": "Cash",
+  "investment": "Investment"
 }

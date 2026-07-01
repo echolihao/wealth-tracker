@@ -269,5 +269,8 @@
   "importFailed": "Échec de l'importation",
   "importDetails": "Détails",
   "selectCsvFile": "Veuillez sélectionner un fichier CSV",
-  "noFileSelected": "Aucun fichier sélectionné"
+  "noFileSelected": "Aucun fichier sélectionné",
+  "assetType": "Type d'actif",
+  "cash": "Liquidités",
+  "investment": "Investissement"
 }
