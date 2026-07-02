@@ -262,7 +262,6 @@
   "totalInvestment": "Total Investment",
   "holdingCount": "Holdings",
   "search": "Search",
-  "reset": "Reset",
   "startDate": "Start Date",
   "endDate": "End Date",
   "batchImport": "Batch Import",
@@ -278,5 +277,8 @@
   "cash": "Cash",
   "investment": "Investment",
   "currentTotalPnl": "Current Total P&L",
-  "allTotalPnl": "Overall Total P&L"
+  "allTotalPnl": "Overall Total P&L",
+  "tradeDetail": "Trade Detail",
+  "realizedPnl": "Realized P&L",
+  "viewDetail": "Detail"
 }

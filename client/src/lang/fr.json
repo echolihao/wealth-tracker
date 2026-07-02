@@ -262,7 +262,6 @@
   "totalInvestment": "Investissement total",
   "holdingCount": "Titres détenus",
   "search": "Rechercher",
-  "reset": "Réinitialiser",
   "startDate": "Date de début",
   "endDate": "Date de fin",
   "batchImport": "Import par lot",
@@ -278,5 +277,8 @@
   "cash": "Liquidités",
   "investment": "Investissement",
   "currentTotalPnl": "P&L actuel total",
-  "allTotalPnl": "P&L total global"
+  "allTotalPnl": "P&L total global",
+  "tradeDetail": "Détail de la transaction",
+  "realizedPnl": "P&L réalisé",
+  "viewDetail": "Détail"
 }
