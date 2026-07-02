@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 
 # Scripts
+scripts/
 client/deploy.sh
 server/deploy.sh
 deploy2server.sh
