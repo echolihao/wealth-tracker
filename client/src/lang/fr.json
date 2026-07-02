@@ -247,6 +247,7 @@
   "closeDate": "Date de clôture",
   "holdingDays": "Jours de détention",
   "profitLoss": "P&L",
+  "fee": "Frais",
   "recordTrade": "Enregistrer",
   "tradeSuccess": "Transaction enregistrée",
   "tradeDeleted": "Transaction supprimée",

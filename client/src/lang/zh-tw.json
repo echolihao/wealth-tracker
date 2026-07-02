@@ -247,6 +247,7 @@
   "closeDate": "平倉日期",
   "holdingDays": "持有天數",
   "profitLoss": "盈虧",
+  "fee": "手續費",
   "recordTrade": "記錄交易",
   "tradeSuccess": "交易記錄成功",
   "tradeDeleted": "交易已刪除",

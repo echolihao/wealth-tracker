@@ -247,6 +247,7 @@
   "closeDate": "Close Date",
   "holdingDays": "Holding Days",
   "profitLoss": "P&L",
+  "fee": "Fee",
   "recordTrade": "Record Trade",
   "tradeSuccess": "Trade recorded successfully",
   "tradeDeleted": "Trade deleted",

@@ -168,6 +168,8 @@ export const createTrade = async (request, reply) => {
     })
   }
 
+  const fee = Math.max(0, Number(params.fee) || 0)
+
   const trade_date = params.trade_date
   if (!trade_date) {
     return reply.code(400).send({
@@ -200,11 +202,12 @@ export const createTrade = async (request, reply) => {
           quantity,
           price,
           amount,
+          fee,
           trade_date,
           note: params.note || '',
           realized_pnl:
             params.type === 'SELL' && existing
-              ? (price - costPrice) * quantity
+              ? (price - costPrice) * quantity - fee
               : null,
           created: new Date(),
         },
@@ -219,7 +222,7 @@ export const createTrade = async (request, reply) => {
           const oldQty = Number(existing.quantity)
           const oldCost = Number(existing.cost_price)
           const newQty = oldQty + quantity
-          const newCost = (oldQty * oldCost + quantity * price) / newQty
+          const newCost = (oldQty * oldCost + quantity * price + fee) / newQty
           const currentPrice =
             existing.current_price !== null
               ? Number(existing.current_price)
@@ -242,7 +245,7 @@ export const createTrade = async (request, reply) => {
               security_symbol: params.security_symbol,
               security_name: params.security_name,
               quantity,
-              cost_price: price,
+              cost_price: (quantity * price + fee) / quantity,
               current_price: price,
               amount: quantity * price,
               realized_pnl: 0,
@@ -267,7 +270,7 @@ export const createTrade = async (request, reply) => {
         }
         const newQty = oldQty - quantity
         const costPrice = Number(existing.cost_price)
-        const realizedPnl = (price - costPrice) * quantity
+        const realizedPnl = (price - costPrice) * quantity - fee
         const updateData: any = {
           quantity: newQty,
           realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
@@ -321,6 +324,7 @@ export const updateTrade = async (request, reply) => {
       const newQty = Number(params.quantity ?? oldTrade.quantity)
       const newPrice = Number(params.price ?? oldTrade.price)
       const newAmount = Number(params.amount ?? oldTrade.amount)
+      const newFee = params.fee !== undefined ? Math.max(0, Number(params.fee) || 0) : Number(oldTrade.fee ?? 0)
       const newDate = params.trade_date || oldTrade.trade_date
 
       // Query position state before applying new trade (for realized_pnl calculation)
@@ -339,6 +343,8 @@ export const updateTrade = async (request, reply) => {
         newPrice,
         t,
         newDate,
+        undefined,
+        newFee,
       )
 
       await Trade.update(
@@ -349,11 +355,12 @@ export const updateTrade = async (request, reply) => {
           quantity: newQty,
           price: newPrice,
           amount: newAmount,
+          fee: newFee,
           trade_date: newDate,
           note: params.note !== undefined ? params.note : oldTrade.note,
           realized_pnl:
             newType === 'SELL' && posBefore
-              ? (newPrice - costPriceBefore) * newQty
+              ? (newPrice - costPriceBefore) * newQty - newFee
               : null,
         },
         { where: { id }, transaction: t },
@@ -425,8 +432,9 @@ async function reverseTradeEffect(trade: any, t: any) {
       } else {
         // Restore cost price to before this buy (reverse weighted avg)
         const oldCost = Number(existing.cost_price)
+        const tradeFee = Number(trade.fee ?? 0)
         const restoredCost =
-          oldQty > 0 ? (oldQty * oldCost - qty * price) / newQty : 0
+          oldQty > 0 ? (oldQty * oldCost - qty * price - tradeFee) / newQty : 0
         updateData.cost_price = restoredCost
         const currentPrice =
           existing.current_price !== null
@@ -491,6 +499,7 @@ async function applyTradeEffect(
   t: any,
   tradeDate?: string,
   existingPosition?: any,
+  fee: number = 0,
 ) {
   const existing = existingPosition || await Position.findOne({
     where: { asset_id: assetId, security_symbol: symbol, status: 'Open' },
@@ -503,7 +512,7 @@ async function applyTradeEffect(
       const oldQty = Number(existing.quantity)
       const oldCost = Number(existing.cost_price)
       const newQty = oldQty + quantity
-      const newCost = (oldQty * oldCost + quantity * price) / newQty
+      const newCost = (oldQty * oldCost + quantity * price + fee) / newQty
       const currentPrice =
         existing.current_price !== null
           ? Number(existing.current_price)
@@ -526,7 +535,7 @@ async function applyTradeEffect(
           security_symbol: symbol,
           security_name: name,
           quantity,
-          cost_price: price,
+          cost_price: (quantity * price + fee) / quantity,
           current_price: price,
           amount: quantity * price,
           realized_pnl: 0,
@@ -551,7 +560,7 @@ async function applyTradeEffect(
     }
     const newQty = oldQty - quantity
     const costPrice = Number(existing.cost_price)
-    const realizedPnl = (price - costPrice) * quantity
+    const realizedPnl = (price - costPrice) * quantity - fee
     const updateData: any = {
       quantity: newQty,
       realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
@@ -623,6 +632,7 @@ export const importTrades = async (request, reply) => {
           'quantity',
           'price',
           'amount',
+          'fee',
           'note',
         ],
         from: 2, // skip header row
@@ -667,6 +677,7 @@ export const importTrades = async (request, reply) => {
       quantity: number
       price: number
       amount: number
+      fee: number
       note: string
     }> = []
 
@@ -724,6 +735,16 @@ export const importTrades = async (request, reply) => {
         }
       }
 
+      // fee (optional — default 0)
+      let fee = 0
+      if (row.fee !== undefined && row.fee !== null && row.fee !== '') {
+        fee = Number(row.fee)
+        if (fee < 0) {
+          errors.push({ row: rowNum, field: '费用', message: '费用不能为负数' })
+          return
+        }
+      }
+
       validated.push({
         trade_date: row.trade_date,
         type: tradeType,
@@ -732,6 +753,7 @@ export const importTrades = async (request, reply) => {
         quantity: qty,
         price: p,
         amount: amt,
+        fee,
         note: row.note?.trim() || '',
       })
     })
@@ -770,6 +792,7 @@ export const importTrades = async (request, reply) => {
           t,
           v.trade_date,
           posBefore,
+          v.fee,
         )
 
         await Trade.create(
@@ -781,11 +804,12 @@ export const importTrades = async (request, reply) => {
             quantity: v.quantity,
             price: v.price,
             amount: v.amount,
+            fee: v.fee,
             trade_date: v.trade_date,
             note: v.note,
             realized_pnl:
               v.type === 'SELL' && posBefore
-                ? (v.price - costPrice) * v.quantity
+                ? (v.price - costPrice) * v.quantity - v.fee
                 : null,
             created: new Date(),
           },

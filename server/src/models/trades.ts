@@ -12,6 +12,7 @@ export class Trade extends Model {
   declare amount: number
   declare trade_date: string
   declare note: string
+  declare fee: number
   declare realized_pnl: number | null
   declare created: Date
 }
@@ -59,6 +60,11 @@ Trade.init(
       type: DataTypes.TEXT,
       allowNull: true,
       defaultValue: '',
+    },
+    fee: {
+      type: DataTypes.DECIMAL(14, 2),
+      allowNull: false,
+      defaultValue: 0,
     },
     realized_pnl: {
       type: DataTypes.DECIMAL(14, 2),

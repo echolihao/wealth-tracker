@@ -22,7 +22,7 @@
   let result: ImportResult | null = null
 
   // CSV template content
-  const CSV_HEADER = '交易日期,操作类型,证券代码,证券名称,数量,价格,金额,备注'
+  const CSV_HEADER = '交易日期,操作类型,证券代码,证券名称,数量,价格,金额,费用,备注'
 
   const handleDownloadTemplate = () => {
     const blob = new Blob(['﻿' + CSV_HEADER], { type: 'text/csv;charset=utf-8;' })

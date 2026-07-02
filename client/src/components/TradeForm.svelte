@@ -16,6 +16,7 @@
   let quantity = ''
   let price = ''
   let amount = 0
+  let fee = ''
   let tradeDate = dayjs().format('YYYY-MM-DD')
   let note = ''
   let submitting = false
@@ -32,6 +33,7 @@
     quantity = ''
     price = ''
     amount = 0
+    fee = ''
     tradeDate = dayjs().format('YYYY-MM-DD')
     note = ''
   }
@@ -62,6 +64,7 @@
 
     submitting = true
     try {
+      const tradeFee = parseFloat(fee) || 0
       await createTrade(assetId, {
         type: tradeType,
         security_symbol: securitySymbol.trim(),
@@ -69,6 +72,7 @@
         quantity: qty,
         price: p,
         amount: amount,
+        fee: tradeFee > 0 ? tradeFee : undefined,
         trade_date: tradeDate,
         note: note.trim(),
       })
@@ -77,6 +81,7 @@
       quantity = ''
       price = ''
       amount = 0
+      fee = ''
       dispatch('created')
     } catch (error: any) {
       const msg = error?.response?.data?.message || error.message
@@ -175,6 +180,16 @@
         class="custom-input bg-gray-50"
         value={amount ? amount.toFixed(2) : ''}
         disabled />
+    </div>
+    <div class="module-warp">
+      <label class="custom-label">{$_('fee')}</label>
+      <input
+        type="number"
+        step="0.01"
+        min="0"
+        class="custom-input"
+        bind:value={fee}
+        placeholder="0.00" />
     </div>
     <div class="module-warp">
       <label class="custom-label">

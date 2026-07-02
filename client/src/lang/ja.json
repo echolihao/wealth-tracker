@@ -247,6 +247,7 @@
   "closeDate": "決済日",
   "holdingDays": "保有日数",
   "profitLoss": "損益",
+  "fee": "手数料",
   "recordTrade": "取引を記録",
   "tradeSuccess": "取引を記録しました",
   "tradeDeleted": "取引を削除しました",

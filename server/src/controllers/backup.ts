@@ -234,6 +234,7 @@ export const importData = async (request, reply) => {
             quantity: item.quantity,
             price: item.price,
             amount: item.amount,
+            fee: item.fee || 0,
             trade_date: item.trade_date,
             note: item.note || '',
             created: item.created || new Date(),

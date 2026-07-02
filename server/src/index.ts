@@ -43,6 +43,7 @@ const connectToSqlite = async () => {
     }
     await addColumnIfNotExists('positions', 'open_date', 'DATE')
     await addColumnIfNotExists('positions', 'close_date', 'DATE')
+    await addColumnIfNotExists('trades', 'fee', 'DECIMAL(14,2) NOT NULL DEFAULT 0')
 
     console.log('🎊 Database synced!')
   } catch (err) {
