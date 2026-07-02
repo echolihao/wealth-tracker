@@ -16,6 +16,7 @@
     success: boolean
     imported: number
     errors: Array<{ row: number; field: string; message: string }>
+    warnings?: Array<{ row: number; field: string; message: string }>
     details: string
   }
 
@@ -57,7 +58,11 @@
         notice.set(
           $_('importSuccess', { values: { count: res.imported } }),
         )
-        dispatch('imported')
+        if (res.warnings && res.warnings.length > 0) {
+          // 有警告时不关闭弹窗，让用户查看后再手动关闭
+        } else {
+          dispatch('imported')
+        }
       }
     } catch (error: any) {
       // error from ajax.ts .catch: err.response.data (the response body)
@@ -80,9 +85,13 @@
   }
 
   const handleClose = () => {
+    const wasSuccess = result?.success ?? false
     show = false
     selectedFile = null
     result = null
+    if (wasSuccess) {
+      dispatch('imported')
+    }
   }
 </script>
 
@@ -133,7 +142,7 @@
 
       <!-- Import button -->
       <button
-        on:click={handleImport}
+        on:click={result?.success ? handleClose : handleImport}
         disabled={importing || !selectedFile}
         class="w-full rounded-lg px-4 py-2 font-medium text-white disabled:opacity-50
           {result?.success ? 'bg-green-500' : 'bg-blue-600 hover:bg-blue-700'}">
@@ -156,6 +165,20 @@
                 <span class="mx-1">·</span>
               {/if}
               <span class="font-medium">{err.field}:</span> {err.message}
+            </div>
+          {/each}
+        </div>
+      {/if}
+      {#if result && result.warnings && result.warnings.length > 0}
+        <div class="mt-4 max-h-40 overflow-y-auto rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+          <p class="mb-2 text-sm font-medium text-yellow-700">提示：</p>
+          {#each result.warnings as w}
+            <div class="mb-1 rounded bg-white px-2 py-1 text-xs text-yellow-700">
+              {#if w.row > 0}
+                <span class="font-mono">第 {w.row} 行</span>
+                <span class="mx-1">·</span>
+              {/if}
+              <span class="font-medium">{w.field}:</span> {w.message}
             </div>
           {/each}
         </div>

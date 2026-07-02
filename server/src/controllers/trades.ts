@@ -669,6 +669,7 @@ export const importTrades = async (request, reply) => {
 
     // 3. Validate all rows
     const errors: Array<{ row: number; field: string; message: string }> = []
+    const warnings: Array<{ row: number; field: string; message: string }> = []
     const validated: Array<{
       trade_date: string
       type: string
@@ -730,8 +731,7 @@ export const importTrades = async (request, reply) => {
       } else {
         amt = Number(row.amount)
         if (Math.abs(amt - qty * p) > 0.01) {
-          errors.push({ row: rowNum, field: '金额', message: '金额必须等于数量 × 价格' })
-          return
+          warnings.push({ row: rowNum, field: '金额', message: '金额不等于数量 × 价格，已保留文件中填写的金额' })
         }
       }
 
@@ -763,6 +763,7 @@ export const importTrades = async (request, reply) => {
         success: false,
         imported: 0,
         errors,
+        warnings,
         details: `导入失败：共 ${errors.length} 行有错误。`,
       })
     }
@@ -822,6 +823,7 @@ export const importTrades = async (request, reply) => {
       success: true,
       imported: validated.length,
       errors: [],
+      warnings,
       details: `成功导入 ${validated.length} 条交易记录（共 ${validated.length} 条）。`,
     })
   } catch (error: any) {
