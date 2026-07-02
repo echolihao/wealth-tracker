@@ -577,6 +577,61 @@ async function applyTradeEffect(
   }
 }
 
+export const exportTradesCsv = async (request, reply) => {
+  const { id } = request.params
+  const { startDate, endDate, type, symbol } = request.query
+  try {
+    const whereClause: any = { asset_id: id }
+
+    if (startDate) {
+      whereClause.trade_date = { ...whereClause.trade_date, [Op.gte]: startDate }
+    }
+    if (endDate) {
+      whereClause.trade_date = { ...whereClause.trade_date, [Op.lte]: endDate }
+    }
+    if (type) {
+      whereClause.type = type
+    }
+    if (symbol) {
+      whereClause.security_symbol = { [Op.like]: `%${symbol}%` }
+    }
+
+    const rows = await Trade.findAll({
+      where: whereClause,
+      order: [['trade_date', 'DESC'], ['created', 'DESC']],
+    })
+
+    // Build CSV matching import template (BOM for Excel compatibility)
+    const header = '交易日期,操作类型,证券代码,证券名称,数量,价格,金额,费用,备注\n'
+    const body = rows
+      .map((row) => {
+        return [
+          row.trade_date,
+          row.type,
+          row.security_symbol,
+          row.security_name,
+          Number(row.quantity).toString(),
+          Number(row.price).toFixed(4),
+          Number(row.amount).toFixed(2),
+          Number(row.fee ?? 0).toFixed(2),
+          `"${(row.note || '').replace(/"/g, '""')}"`,
+        ].join(',')
+      })
+      .join('\n')
+
+    const csv = '﻿' + header + body
+
+    reply.header('Content-Type', 'text/csv; charset=utf-8')
+    reply.header('Content-Disposition', `attachment; filename="trades_export_${id}.csv"`)
+    return reply.send(csv)
+  } catch (error: any) {
+    return reply.code(400).send({
+      statusCode: 400,
+      message: error.message,
+    })
+  }
+}
+
 export const importTrades = async (request, reply) => {
   const { id } = request.params
 

@@ -157,3 +157,23 @@ export const importTrades = (id: number, file: File) => {
   formData.append('file', file)
   return $ajax.post(genApiPath(`assets/${id}/trades/import`), formData)
 }
+
+export const exportTradesCsv = async (id: number, params?: any) => {
+  const baseUrl = genApiPath(`assets/${id}/trades/export`)
+  const query = params
+    ? '?' +
+      Object.entries(params)
+        .filter(([, v]) => v != null && v !== '')
+        .map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`)
+        .join('&')
+    : ''
+  const res = await fetch(baseUrl + query)
+  const blob = await res.blob()
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `trades_export_${id}.csv`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(link.href)
+}

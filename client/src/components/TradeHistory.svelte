@@ -5,7 +5,7 @@
   import SvgIcon from './SvgIcon.svelte'
   import Skeleton from './Skeleton.svelte'
   import BatchImport from './BatchImport.svelte'
-  import { deleteTrade } from '../helper/apis'
+  import { deleteTrade, exportTradesCsv } from '../helper/apis'
   import { alert, notice } from '../stores'
   import type { LinkType } from 'flowbite-svelte'
 
@@ -105,6 +105,21 @@
     dispatch('pageSizeChange', Number(target.value))
   }
 
+  const handleExport = async () => {
+    if (!assetId) return
+    try {
+      const params: any = {}
+      if (localStartDate) params.startDate = localStartDate
+      if (localEndDate) params.endDate = localEndDate
+      if (localType) params.type = localType
+      if (localSymbol) params.symbol = localSymbol
+      await exportTradesCsv(assetId, params)
+      notice.set($_('tradeExportSuccess'))
+    } catch (error: any) {
+      alert.set(error?.message || $_('tradeExportFailed'))
+    }
+  }
+
   const handleSearch = () => {
     dispatch('searchChange', {
       startDate: localStartDate,
@@ -167,6 +182,11 @@
     <h3 class="text-base font-medium">{$_('tradeHistory')}</h3>
     <div class="flex items-center gap-2">
       {#if showImportButton}
+        <button
+          on:click={handleExport}
+          class="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
+          {$_('exportTradeCsv')}
+        </button>
         <button
           on:click={() => (showBatchImport = true)}
           class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">

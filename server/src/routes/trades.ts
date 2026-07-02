@@ -6,6 +6,7 @@ import {
   createTrade,
   updateTrade,
   deleteTrade,
+  exportTradesCsv,
   importTrades,
 } from '../controllers/trades'
 
@@ -44,6 +45,11 @@ export default [
     method: 'DELETE',
     url: '/api/trades/:id',
     handler: deleteTrade,
+  },
+  {
+    method: 'GET',
+    url: '/api/assets/:id/trades/export',
+    handler: exportTradesCsv,
   },
   {
     method: 'POST',
