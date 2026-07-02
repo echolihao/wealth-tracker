@@ -181,7 +181,25 @@
             </td>
             <td class="text-right font-mono text-sm">{formatAmount(position.amount)}</td>
             <td class="text-right font-mono text-sm">
-              {#if position.current_price != null && position.cost_price != null}
+              {#if position.current_price != null && position.cost_price != null && Number(position.cost_price) > 0}
+                {@const unrealizedPnl =
+                  (Number(position.current_price) - Number(position.cost_price)) *
+                  Number(position.quantity)}
+                {@const realizedPnl = Number(position.realized_pnl ?? 0)}
+                {@const totalPnl = unrealizedPnl + realizedPnl}
+                {@const costBasis = Number(position.cost_price) * Number(position.quantity)}
+                {@const pnlPercent = costBasis > 0 ? (totalPnl / costBasis) * 100 : 0}
+                <span
+                  class:font-medium={true}
+                  class:text-red-600={totalPnl > 0}
+                  class:text-green-600={totalPnl < 0}>
+                  {totalPnl > 0 ? '+' : ''}{totalPnl.toLocaleString('zh-CN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                  ({pnlPercent > 0 ? '+' : ''}{pnlPercent.toFixed(2)}%)
+                </span>
+              {:else if position.current_price != null && position.cost_price != null}
                 {@const unrealizedPnl =
                   (Number(position.current_price) - Number(position.cost_price)) *
                   Number(position.quantity)}
