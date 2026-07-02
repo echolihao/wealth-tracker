@@ -496,6 +496,7 @@ async function applyTradeEffect(
   name: string,
   quantity: number,
   price: number,
+  amount: number,
   t: any,
   tradeDate?: string,
   existingPosition?: any,
@@ -512,7 +513,7 @@ async function applyTradeEffect(
       const oldQty = Number(existing.quantity)
       const oldCost = Number(existing.cost_price)
       const newQty = oldQty + quantity
-      const newCost = (oldQty * oldCost + quantity * price + fee) / newQty
+      const newCost = (oldQty * oldCost + amount + fee) / newQty
       const currentPrice =
         existing.current_price !== null
           ? Number(existing.current_price)
@@ -535,7 +536,7 @@ async function applyTradeEffect(
           security_symbol: symbol,
           security_name: name,
           quantity,
-          cost_price: (quantity * price + fee) / quantity,
+          cost_price: (amount + fee) / quantity,
           current_price: price,
           amount: quantity * price,
           realized_pnl: 0,
@@ -560,7 +561,7 @@ async function applyTradeEffect(
     }
     const newQty = oldQty - quantity
     const costPrice = Number(existing.cost_price)
-    const realizedPnl = (price - costPrice) * quantity - fee
+    const realizedPnl = (amount - fee) - costPrice * quantity
     const updateData: any = {
       quantity: newQty,
       realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
