@@ -167,10 +167,12 @@
     <div class="module-warp">
       <label class="custom-label">{$_('tradeAmount')}</label>
       <input
-        type="text"
-        class="custom-input bg-gray-50"
-        value={amount ? amount.toFixed(2) : ''}
-        disabled />
+        type="number"
+        step="0.01"
+        class="custom-input"
+        class:bg-yellow-50={Math.abs(amount - (parseFloat(quantity) || 0) * (parseFloat(price) || 0)) > 0.01}
+        bind:value={amount}
+        placeholder="0.00" />
     </div>
     <div class="module-warp">
       <label class="custom-label">{$_('fee')}</label>

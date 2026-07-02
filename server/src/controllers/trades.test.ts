@@ -461,15 +461,25 @@ describe('createTrade', () => {
       )
     })
 
-    it('should reject amount that does not equal quantity × price', async () => {
+    it('should allow amount that differs from quantity × price (multi-fill execution)', async () => {
       mockAssetsFindByPk.mockResolvedValue({ id: 1, type: 'INVESTMENT' })
+      const trade = makeTradeInstance()
+      mockTradeCreate.mockResolvedValue(trade)
+      mockPositionFindOne.mockResolvedValue(null)
       const reply = mockReply()
 
-      await tradesCtrl.createTrade(makeRequest({ amount: 9999 }) as any, reply)
+      // amount=1510 but qty×price=1500 — 10元偏差来自多笔成交
+      await tradesCtrl.createTrade(makeRequest({ amount: 1510 }) as any, reply)
 
-      expect(reply.code).toHaveBeenCalledWith(400)
-      expect(reply.code().send).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'Amount must equal quantity × price.' }),
+      // 不应报错，应正常创建
+      expect(reply.send).toHaveBeenCalledWith(trade)
+      // 成本价应基于实际 amount: (1510 + 0) / 10 = 151
+      expect(mockPositionCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cost_price: 151,
+          amount: 1510,
+        }),
+        { transaction: mockT },
       )
     })
 
@@ -552,6 +562,34 @@ describe('createTrade', () => {
       )
     })
 
+    it('should use actual amount for weighted average cost when amount ≠ qty × price', async () => {
+      const existingPos = makePositionInstance({
+        asset_id: 1,
+        security_symbol: 'AAPL',
+        quantity: 5,
+        cost_price: 140,
+        current_price: 145,
+        amount: 725,
+        status: 'Open',
+      })
+      mockTradeCreate.mockResolvedValue(makeTradeInstance())
+      mockPositionFindOne.mockResolvedValue(existingPos)
+      const reply = mockReply()
+
+      // amount=1510, qty=10, price=150 → qty×price=1500, 偏差10
+      await tradesCtrl.createTrade(makeRequest({ amount: 1510 }) as any, reply)
+
+      // newCost = (5*140 + 1510 + 0) / 15 = (700 + 1510) / 15 = 147.33...
+      const expectedCost = (5 * 140 + 1510) / 15
+      expect(existingPos.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          quantity: 15,
+          cost_price: expectedCost,
+        }),
+        { transaction: mockT },
+      )
+    })
+
     it('should handle SELL trade', async () => {
       const trade = makeTradeInstance({ type: 'SELL' })
       const existingPos = makePositionInstance({
@@ -627,6 +665,35 @@ describe('createTrade', () => {
       expect(existingPos.update).toHaveBeenCalledWith(
         expect.objectContaining({
           realized_pnl: 150,
+        }),
+        { transaction: mockT },
+      )
+    })
+
+    it('should calculate realized_pnl from actual amount on SELL when amount ≠ qty × price', async () => {
+      const existingPos = makePositionInstance({
+        asset_id: 1,
+        security_symbol: 'AAPL',
+        quantity: 15,
+        cost_price: 140,
+        current_price: 160,
+        amount: 2400,
+        status: 'Open',
+      })
+      mockTradeCreate.mockResolvedValue(makeTradeInstance({ type: 'SELL' }))
+      mockPositionFindOne.mockResolvedValue(existingPos)
+      const reply = mockReply()
+
+      // amount=1590, qty=10, price=160 → qty×price=1600, 偏差-10（实际卖出均价更低）
+      await tradesCtrl.createTrade(
+        makeRequest({ type: 'SELL', amount: 1590 }) as any,
+        reply,
+      )
+
+      // realizedPnl = (1590 - 0) - 140*10 = 1590 - 1400 = 190
+      expect(mockTradeCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          realized_pnl: 190,
         }),
         { transaction: mockT },
       )
@@ -991,7 +1058,7 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
     expect(existingPos.update).toHaveBeenCalledWith(
       expect.objectContaining({
         quantity: 5,
-        cost_price: 135,
+        cost_price: (15 * 145 - 1500) / 5, // = 135, 用 amount=1500 计算
         amount: 5 * 155,
       }),
       expect.anything(),
