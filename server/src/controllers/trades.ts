@@ -533,7 +533,7 @@ async function applyTradeEffect(
           quantity,
           cost_price: (amount + fee) / quantity,
           current_price: price,
-          amount: quantity * price,
+          amount: amount,
           realized_pnl: 0,
           status: 'Open',
           open_date: tradeDate || null,
