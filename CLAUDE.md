@@ -51,9 +51,9 @@ Wealth Tracker（生财有迹）是一个 monorepo，包含 Svelte 前端、Fast
 ```
 wealth-tracker/
 ├── client/        # Svelte 4 + Vite + Tailwind + Flowbite 前端
-├── server/        # Fastify + TypeScript + Sequelize + SQLite 后端
+├── server/        # Fastify + TypeScript + Sequelize + SQLite 后端（数据库在 server/data/）
 ├── desktop/       # Electron 桌面壳
-├── data/          # SQLite 数据库文件
+├── data/          # （旧）SQLite 数据库文件，已废弃
 └── docs/          # 文档/规划
 ```
 
@@ -93,6 +93,8 @@ wealth-tracker/
 - 自定义认证中间件 — 检查除白名单（`/api/heart`、`/api/password/check`、`/api/password/verify`）外的所有 `/api/*` 路由，基于 httpOnly Cookie 会话
 
 **数据库**：Sequelize ORM + SQLite。模型文件在 `server/src/models/`，包含 Assets、Record、Position、Trade、Insight、Goal、Password、Session、UserSettings、CustomCurrency。新增模型必须在 `server/src/index.ts` 的 `loadServerModules()` 中 import。
+
+> ⚠️ 数据库文件实际路径是 `server/data/wealth_tracker.sqlite`（由 `server/src/helper/constant.ts` 中 `DEFAULT_SQLITE_DB` 定义）。根目录 `data/wealth_tracker.sqlite` 是旧版路径，已废弃。通过 `SQLITE_DB_PATH` 环境变量可覆盖。
 
 **数据库迁移**：在 `server/src/index.ts` 的 `connectToSqlite()` 中内联执行。模式：用 `PRAGMA table_info` 检查列是否存在 → 不存在则 `ALTER TABLE ADD COLUMN`。这是 SQLite 向后兼容迁移的标准做法。
 
