@@ -434,7 +434,7 @@ async function reverseTradeEffect(trade: any, t: any) {
         const oldCost = Number(existing.cost_price)
         const tradeFee = Number(trade.fee ?? 0)
         const restoredCost =
-          oldQty > 0 ? (oldQty * oldCost - qty * price - tradeFee) / newQty : 0
+          oldQty > 0 ? (oldQty * oldCost - Number(trade.amount) - tradeFee) / newQty : 0
         updateData.cost_price = restoredCost
         const currentPrice =
           existing.current_price !== null
