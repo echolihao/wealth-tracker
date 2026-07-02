@@ -335,6 +335,7 @@ export const updateTrade = async (request, reply) => {
         newName,
         newQty,
         newPrice,
+        newAmount,
         t,
         newDate,
         undefined,
@@ -354,7 +355,7 @@ export const updateTrade = async (request, reply) => {
           note: params.note !== undefined ? params.note : oldTrade.note,
           realized_pnl:
             newType === 'SELL' && posBefore
-              ? (newPrice - costPriceBefore) * newQty - newFee
+              ? (newAmount - newFee) - costPriceBefore * newQty
               : null,
         },
         { where: { id }, transaction: t },
