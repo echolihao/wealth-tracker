@@ -161,12 +161,6 @@ export const createTrade = async (request, reply) => {
   }
 
   const amount = Number(params.amount)
-  if (Math.abs(amount - quantity * price) > 0.01) {
-    return reply.code(400).send({
-      statusCode: 400,
-      message: 'Amount must equal quantity × price.',
-    })
-  }
 
   const fee = Math.max(0, Number(params.fee) || 0)
 
@@ -207,7 +201,7 @@ export const createTrade = async (request, reply) => {
           note: params.note || '',
           realized_pnl:
             params.type === 'SELL' && existing
-              ? (price - costPrice) * quantity - fee
+              ? (amount - fee) - costPrice * quantity
               : null,
           created: new Date(),
         },
@@ -222,7 +216,7 @@ export const createTrade = async (request, reply) => {
           const oldQty = Number(existing.quantity)
           const oldCost = Number(existing.cost_price)
           const newQty = oldQty + quantity
-          const newCost = (oldQty * oldCost + quantity * price + fee) / newQty
+          const newCost = (oldQty * oldCost + amount + fee) / newQty
           const currentPrice =
             existing.current_price !== null
               ? Number(existing.current_price)
@@ -245,9 +239,9 @@ export const createTrade = async (request, reply) => {
               security_symbol: params.security_symbol,
               security_name: params.security_name,
               quantity,
-              cost_price: (quantity * price + fee) / quantity,
+              cost_price: (amount + fee) / quantity,
               current_price: price,
-              amount: quantity * price,
+              amount: amount,
               realized_pnl: 0,
               status: 'Open',
               open_date: trade_date,
@@ -270,7 +264,7 @@ export const createTrade = async (request, reply) => {
         }
         const newQty = oldQty - quantity
         const costPrice = Number(existing.cost_price)
-        const realizedPnl = (price - costPrice) * quantity - fee
+        const realizedPnl = (amount - fee) - costPrice * quantity
         const updateData: any = {
           quantity: newQty,
           realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
