@@ -785,6 +785,7 @@ export const importTrades = async (request, reply) => {
           v.security_name,
           v.quantity,
           v.price,
+          v.amount,
           t,
           v.trade_date,
           posBefore,
@@ -805,7 +806,7 @@ export const importTrades = async (request, reply) => {
             note: v.note,
             realized_pnl:
               v.type === 'SELL' && posBefore
-                ? (v.price - costPrice) * v.quantity - v.fee
+                ? (v.amount - v.fee) - costPrice * v.quantity
                 : null,
             created: new Date(),
           },
