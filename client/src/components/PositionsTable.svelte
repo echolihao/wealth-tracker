@@ -19,14 +19,12 @@
 
   $: totalOpenPnl = openPositions.reduce((sum, p) => {
     const unrealized =
-      (Number(p.current_price ?? 0) - Number(p.cost_price ?? 0)) *
-      Number(p.quantity ?? 0)
+      (Number(p.current_price ?? 0) - Number(p.cost_price ?? 0)) * Number(p.quantity ?? 0)
     return sum + unrealized + Number(p.realized_pnl ?? 0)
   }, 0)
 
   $: totalAllPnl =
-    totalOpenPnl +
-    closedPositions.reduce((sum, p) => sum + Number(p.realized_pnl ?? 0), 0)
+    totalOpenPnl + closedPositions.reduce((sum, p) => sum + Number(p.realized_pnl ?? 0), 0)
 
   $: openPositions = positions.filter((p: any) => p.status === 'Open')
   $: closedPositions = positions
@@ -176,17 +174,28 @@
                   on:keydown={(e) => handleKeydown(e, position)}
                   autofocus />
               {:else}
-                <span class="cursor-pointer hover:text-brand">{formatPrice(position.current_price)}</span>
+                <span class="cursor-pointer hover:text-brand">
+                  {formatPrice(position.current_price)}
+                </span>
               {/if}
             </td>
             <td class="text-right font-mono text-sm">{formatAmount(position.amount)}</td>
             <td class="text-right font-mono text-sm">
               {#if position.current_price != null && position.cost_price != null}
-                {@const unrealizedPnl = (Number(position.current_price) - Number(position.cost_price)) * Number(position.quantity)}
+                {@const unrealizedPnl =
+                  (Number(position.current_price) - Number(position.cost_price)) *
+                  Number(position.quantity)}
                 {@const realizedPnl = Number(position.realized_pnl ?? 0)}
                 {@const totalPnl = unrealizedPnl + realizedPnl}
-                <span class:font-medium={true} class:text-red-600={totalPnl > 0} class:text-green-600={totalPnl < 0}
-                  >{totalPnl > 0 ? '+' : ''}{totalPnl.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span
+                  class:font-medium={true}
+                  class:text-red-600={totalPnl > 0}
+                  class:text-green-600={totalPnl < 0}>
+                  {totalPnl > 0 ? '+' : ''}{totalPnl.toLocaleString('zh-CN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
               {:else}
                 -
               {/if}
@@ -211,10 +220,7 @@
       <button
         on:click={() => (showClosed = !showClosed)}
         class="mt-4 flex items-center gap-1 text-sm text-gray-500 hover:text-brand">
-        <SvgIcon
-          name={showClosed ? 'chevron-down' : 'chevron-right'}
-          width={16}
-          height={16} />
+        <SvgIcon name={showClosed ? 'chevron-down' : 'chevron-right'} width={16} height={16} />
         {$_('closedPositions')} ({closedPositions.length})
       </button>
       {#if showClosed}
@@ -237,7 +243,10 @@
                 <td class="text-center text-sm">{formatDate(position.open_date)}</td>
                 <td class="text-center text-sm">{formatDate(position.close_date)}</td>
                 <td class="text-center text-sm">{getHoldingDays(position)}</td>
-                <td class="text-right font-mono text-sm" class:text-red-600={position.realized_pnl > 0} class:text-green-600={position.realized_pnl < 0}>
+                <td
+                  class="text-right font-mono text-sm"
+                  class:text-red-600={position.realized_pnl > 0}
+                  class:text-green-600={position.realized_pnl < 0}>
                   {formatPnl(position.realized_pnl)}
                 </td>
               </tr>

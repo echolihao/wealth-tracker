@@ -27,6 +27,8 @@
 
   let showDeleteConfirm = false
   let deleteTarget: any = null
+  let showDetail = false
+  let detailTarget: any = null
   let showBatchImport = false
 
   $: totalPages = Math.ceil(total / size)
@@ -42,6 +44,19 @@
     return Number(value).toLocaleString('zh-CN', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
+    })
+  }
+
+  const formatBeijingTime = (value: any) => {
+    if (!value) return '—'
+    return new Date(value).toLocaleString('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
     })
   }
 
@@ -164,7 +179,9 @@
   <!-- Search bar -->
   <div class="mb-3 flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
     <div>
-      <label for="search-start-date" class="mb-0.5 block text-xs text-gray-500">{$_('startDate')}</label>
+      <label for="search-start-date" class="mb-0.5 block text-xs text-gray-500">
+        {$_('startDate')}
+      </label>
       <input
         id="search-start-date"
         type="date"
@@ -173,7 +190,9 @@
     </div>
     <div class="pb-1 text-sm text-gray-400">~</div>
     <div>
-      <label for="search-end-date" class="mb-0.5 block text-xs text-gray-500">{$_('endDate')}</label>
+      <label for="search-end-date" class="mb-0.5 block text-xs text-gray-500">
+        {$_('endDate')}
+      </label>
       <input
         id="search-end-date"
         type="date"
@@ -192,12 +211,14 @@
       </select>
     </div>
     <div>
-      <label for="search-symbol" class="mb-0.5 block text-xs text-gray-500">{$_('securitySymbol')}</label>
+      <label for="search-symbol" class="mb-0.5 block text-xs text-gray-500">
+        {$_('securitySymbol')}
+      </label>
       <input
         id="search-symbol"
         type="text"
         bind:value={localSymbol}
-        placeholder="{$_('securitySymbol')}"
+        placeholder={$_('securitySymbol')}
         class="w-28 rounded border border-gray-300 px-2 py-1.5 text-sm" />
     </div>
     <div class="flex items-center gap-1">
@@ -262,16 +283,29 @@
             <td class="text-right font-mono text-sm">
               {formatIntAmount(trade.amount)}
             </td>
-            <td class="max-w-[200px] truncate px-4 text-center text-sm text-gray-500" title={trade.note}>
+            <td
+              class="max-w-[200px] truncate px-4 text-center text-sm text-gray-500"
+              title={trade.note}>
               {trade.note || '-'}
             </td>
             <td class="text-center">
-              <button
-                on:click={() => handleDelete(trade)}
-                class="text-sm text-gray-400 hover:text-red-500"
-                title={$_('destroy')}>
-                <SvgIcon name="close" width={16} height={16} />
-              </button>
+              <div class="flex items-center justify-center gap-1">
+                <button
+                  on:click={() => {
+                    detailTarget = trade
+                    showDetail = true
+                  }}
+                  class="text-sm text-gray-400 hover:text-brand"
+                  title={$_('viewDetail')}>
+                  <SvgIcon name="info" width={16} height={16} />
+                </button>
+                <button
+                  on:click={() => handleDelete(trade)}
+                  class="text-sm text-gray-400 hover:text-red-500"
+                  title={$_('destroy')}>
+                  <SvgIcon name="close" width={16} height={16} />
+                </button>
+              </div>
             </td>
           </tr>
         {/each}
@@ -285,29 +319,29 @@
         </span>
         <div class="flex items-center gap-4">
           <Pagination
-          {pages}
-          large
-          on:previous={handlePrevious}
-          on:next={handleNext}
-          on:click={handlePageClick}
-          activeClass="text-brand">
-          <svelte:fragment slot="prev">
-            <span class="sr-only">Previous</span>
-            <SvgIcon name="chevron-left" />
-          </svelte:fragment>
-          <svelte:fragment slot="next">
-            <span class="sr-only">Next</span>
-            <SvgIcon name="chevron-right" />
-          </svelte:fragment>
-        </Pagination>
-        <select
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
-          on:change={handleSizeChange}
-          value={size}>
-          {#each pageSizes as s}
-            <option value={s}>{s} 条/页</option>
-          {/each}
-        </select>
+            {pages}
+            large
+            on:previous={handlePrevious}
+            on:next={handleNext}
+            on:click={handlePageClick}
+            activeClass="text-brand">
+            <svelte:fragment slot="prev">
+              <span class="sr-only">Previous</span>
+              <SvgIcon name="chevron-left" />
+            </svelte:fragment>
+            <svelte:fragment slot="next">
+              <span class="sr-only">Next</span>
+              <SvgIcon name="chevron-right" />
+            </svelte:fragment>
+          </Pagination>
+          <select
+            class="rounded border border-gray-300 px-2 py-1 text-sm"
+            on:change={handleSizeChange}
+            value={size}>
+            {#each pageSizes as s}
+              <option value={s}>{s} 条/页</option>
+            {/each}
+          </select>
         </div>
       </div>
     {:else if total > 10}
@@ -330,9 +364,7 @@
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
     on:click={() => (showDeleteConfirm = false)}>
-    <div
-      class="mx-4 w-full max-w-sm rounded-lg bg-white p-6 shadow-xl"
-      on:click|stopPropagation>
+    <div class="mx-4 w-full max-w-sm rounded-lg bg-white p-6 shadow-xl" on:click|stopPropagation>
       <div class="mb-4 flex items-center gap-2">
         <SvgIcon name="close" width={20} height={20} color="#dc2626" />
         <span class="font-medium">{$_('destroy')} {$_('trade')}</span>
@@ -350,6 +382,97 @@
           on:click={confirmDelete}
           class="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600">
           {$_('confirm')}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Trade detail modal -->
+{#if showDetail && detailTarget}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+    on:click={() => (showDetail = false)}>
+    <div class="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl" on:click|stopPropagation>
+      <div class="mb-4 flex items-center justify-between border-b pb-3">
+        <h3 class="text-lg font-semibold">{$_('tradeDetail')}</h3>
+        <button on:click={() => (showDetail = false)} class="text-gray-400 hover:text-gray-600">
+          <SvgIcon name="close" width={20} height={20} />
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('tradeId')}</span>
+          <span class="text-sm font-mono font-medium">{detailTarget.id}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('assetId')}</span>
+          <span class="text-sm font-mono font-medium">{detailTarget.asset_id}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('tradeDate')}</span>
+          <span class="text-sm font-medium">{detailTarget.trade_date}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('action')}</span>
+          <span
+            class="inline-block rounded-full px-2 py-0.5 text-xs font-medium
+            {detailTarget.type === 'BUY'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-orange-100 text-orange-700'}">
+            {detailTarget.type === 'BUY' ? $_('buy') : $_('sell')}
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('securitySymbol')}</span>
+          <span class="text-sm font-mono font-medium">{detailTarget.security_symbol}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('securityName')}</span>
+          <span class="text-sm font-medium">{detailTarget.security_name}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('quantity')}</span>
+          <span class="text-sm font-medium">{Number(detailTarget.quantity).toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('price')}</span>
+          <span class="text-sm font-medium">{formatAmount(detailTarget.price)}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('fee')}</span>
+          <span class="text-sm font-medium">{formatAmount(detailTarget.fee)}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('tradeAmount')}</span>
+          <span class="text-sm font-medium">{formatIntAmount(detailTarget.amount)}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('realizedPnl')}</span>
+          {#if detailTarget.realized_pnl != null}
+            <span
+              class="text-sm font-bold
+              {Number(detailTarget.realized_pnl) >= 0 ? 'text-red-500' : 'text-green-600'}">
+              {Number(detailTarget.realized_pnl) >= 0 ? '+' : ''}{formatIntAmount(
+                detailTarget.realized_pnl,
+              )}
+            </span>
+          {:else}
+            <span class="text-sm text-gray-400">—</span>
+          {/if}
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('remark')}</span>
+          <span class="text-sm max-w-[250px] text-left">{detailTarget.note || '—'}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">{$_('created')}</span>
+          <span class="text-sm font-medium">{formatBeijingTime(detailTarget.created)}</span>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-center">
+        <button on:click={() => (showDetail = false)} class="cancel-btn rounded px-4 py-2 text-sm">
+          {$_('close')}
         </button>
       </div>
     </div>

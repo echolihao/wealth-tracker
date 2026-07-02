@@ -128,9 +128,7 @@
   <div class="w-full max-w-5xl">
     <h2 class="mb-6 mt-4 text-xl font-semibold">{$_('tradePage')}</h2>
 
-    <AccountSelector
-      bind:selectedAccount
-      on:select={handleAccountSelect} />
+    <AccountSelector bind:selectedAccount on:select={handleAccountSelect} />
 
     {#if selectedAccount}
       <div class="mb-6 rounded-lg border border-gray-200 p-4">
@@ -161,9 +159,7 @@
       </div>
 
       <div class="mb-6" id="trade-form-component">
-        <TradeForm
-          assetId={selectedAccount.id}
-          on:created={handleTradeCreated} />
+        <TradeForm assetId={selectedAccount.id} on:created={handleTradeCreated} />
       </div>
     {:else}
       <div class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-400">

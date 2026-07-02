@@ -280,5 +280,8 @@
   "allTotalPnl": "全部持倉總盈虧",
   "tradeDetail": "交易詳情",
   "realizedPnl": "已實現盈虧",
-  "viewDetail": "詳情"
+  "viewDetail": "詳情",
+  "tradeId": "交易ID",
+  "assetId": "帳戶ID",
+  "created": "創建時間"
 }

@@ -57,9 +57,7 @@
   {:else if accounts.length === 0}
     <div class="rounded-lg border border-dashed border-gray-300 p-6 text-center">
       <p class="mb-2 text-gray-500">{$_('noSecuritiesAccount')}</p>
-      <a
-        href="/"
-        class="comfirm-btn inline-block rounded px-4 py-2 text-sm font-medium text-white">
+      <a href="/" class="comfirm-btn inline-block rounded px-4 py-2 text-sm font-medium text-white">
         {$_('goToAdd')}
       </a>
     </div>
@@ -73,10 +71,12 @@
             ? 'border-brand bg-brand/5 shadow-sm'
             : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}">
           <div class="flex items-center gap-3">
-            <span class="font-medium">{account.alias || account.type.replace('securities:', '')}</span>
-            <span class="text-lg font-semibold text-brand"
-              >¥{formatAmount(getTotalAmount(account))}</span
-            >
+            <span class="font-medium">
+              {account.alias || account.type.replace('securities:', '')}
+            </span>
+            <span class="text-lg font-semibold text-brand">
+              ¥{formatAmount(getTotalAmount(account))}
+            </span>
           </div>
         </button>
       {/each}

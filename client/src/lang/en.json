@@ -280,5 +280,8 @@
   "allTotalPnl": "Overall Total P&L",
   "tradeDetail": "Trade Detail",
   "realizedPnl": "Realized P&L",
-  "viewDetail": "Detail"
+  "viewDetail": "Detail",
+  "tradeId": "Trade ID",
+  "assetId": "Account ID",
+  "created": "Created"
 }

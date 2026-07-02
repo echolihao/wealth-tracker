@@ -55,9 +55,7 @@
       const res: any = await importTrades(assetId, selectedFile)
       result = res
       if (res.success) {
-        notice.set(
-          $_('importSuccess', { values: { count: res.imported } }),
-        )
+        notice.set($_('importSuccess', { values: { count: res.imported } }))
         if (res.warnings && res.warnings.length > 0) {
           // 有警告时不关闭弹窗，让用户查看后再手动关闭
         } else {
@@ -99,9 +97,7 @@
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
     on:click={handleClose}>
-    <div
-      class="mx-4 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl"
-      on:click|stopPropagation>
+    <div class="mx-4 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl" on:click|stopPropagation>
       <!-- Header -->
       <div class="mb-4 flex items-center justify-between">
         <h3 class="flex items-center gap-2 text-lg font-medium">
@@ -146,11 +142,7 @@
         disabled={importing || !selectedFile}
         class="w-full rounded-lg px-4 py-2 font-medium text-white disabled:opacity-50
           {result?.success ? 'bg-green-500' : 'bg-blue-600 hover:bg-blue-700'}">
-        {importing
-          ? $_('persist') + '...'
-          : result?.success
-            ? $_('close')
-            : $_('import')}
+        {importing ? $_('persist') + '...' : result?.success ? $_('close') : $_('import')}
       </button>
 
       <!-- Result display -->
@@ -164,13 +156,15 @@
                 <span class="font-mono">第 {err.row} 行</span>
                 <span class="mx-1">·</span>
               {/if}
-              <span class="font-medium">{err.field}:</span> {err.message}
+              <span class="font-medium">{err.field}:</span>
+              {err.message}
             </div>
           {/each}
         </div>
       {/if}
       {#if result && result.warnings && result.warnings.length > 0}
-        <div class="mt-4 max-h-40 overflow-y-auto rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+        <div
+          class="mt-4 max-h-40 overflow-y-auto rounded-lg border border-yellow-200 bg-yellow-50 p-3">
           <p class="mb-2 text-sm font-medium text-yellow-700">提示：</p>
           {#each result.warnings as w}
             <div class="mb-1 rounded bg-white px-2 py-1 text-xs text-yellow-700">
@@ -178,7 +172,8 @@
                 <span class="font-mono">第 {w.row} 行</span>
                 <span class="mx-1">·</span>
               {/if}
-              <span class="font-medium">{w.field}:</span> {w.message}
+              <span class="font-medium">{w.field}:</span>
+              {w.message}
             </div>
           {/each}
         </div>

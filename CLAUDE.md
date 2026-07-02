@@ -12,6 +12,7 @@ Wealth Tracker（生财有迹）是一个 monorepo，包含 Svelte 前端、Fast
 - **新 Sequelize 模型必须导入**：在 `server/src/index.ts` 的 `loadServerModules()` 中 `import`，且必须在 `sequelize.sync()` 之前。
 - **数据库迁移必须向后兼容**：SQLite 不支持 `ALTER TABLE DROP COLUMN` 或大部分 `ALTER` 操作。新增列使用 `ALTER TABLE ADD COLUMN`（参考 `server/src/index.ts` 中的 `addColumnIfNotExists` 模式），不要修改或删除已有列。
 - **不要在 Prettier 覆盖范围外手动格式化**：Prettier 是权威格式工具。
+- **盈亏颜色遵循国内金融惯例**：红涨绿跌。盈利/正数为红色（`text-red-500`），亏损/负数为绿色（`text-green-600`）。与国际惯例相反，不要用 green 表示盈利。
 
 ## 常用命令
 

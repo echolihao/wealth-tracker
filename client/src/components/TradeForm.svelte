@@ -132,11 +132,7 @@
         {$_('securitySymbol')}
         <i class="text-mark">*</i>
       </label>
-      <input
-        type="text"
-        class="custom-input"
-        bind:value={securitySymbol}
-        placeholder="0700.HK" />
+      <input type="text" class="custom-input" bind:value={securitySymbol} placeholder="0700.HK" />
     </div>
     <div class="module-warp">
       <label class="custom-label">
@@ -154,12 +150,7 @@
         {$_('quantity')}
         <i class="text-mark">*</i>
       </label>
-      <input
-        type="number"
-        step="1"
-        class="custom-input"
-        bind:value={quantity}
-        placeholder="100" />
+      <input type="number" step="1" class="custom-input" bind:value={quantity} placeholder="100" />
     </div>
     <div class="module-warp">
       <label class="custom-label">
@@ -196,10 +187,7 @@
         {$_('tradeDate')}
         <i class="text-mark">*</i>
       </label>
-      <input
-        type="date"
-        class="custom-input"
-        bind:value={tradeDate} />
+      <input type="date" class="custom-input" bind:value={tradeDate} />
     </div>
   </div>
   <div class="module-warp mt-2">

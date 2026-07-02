@@ -280,5 +280,8 @@
   "allTotalPnl": "全部持仓总盈亏",
   "tradeDetail": "交易详情",
   "realizedPnl": "已实现盈亏",
-  "viewDetail": "详情"
+  "viewDetail": "详情",
+  "tradeId": "交易ID",
+  "assetId": "账户ID",
+  "created": "创建时间"
 }

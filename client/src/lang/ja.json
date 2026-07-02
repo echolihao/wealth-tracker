@@ -280,5 +280,8 @@
   "allTotalPnl": "全保有損益",
   "tradeDetail": "取引詳細",
   "realizedPnl": "実現損益",
-  "viewDetail": "詳細"
+  "viewDetail": "詳細",
+  "tradeId": "取引ID",
+  "assetId": "口座ID",
+  "created": "作成日時"
 }
