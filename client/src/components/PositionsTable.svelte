@@ -170,8 +170,7 @@
           <th>{$_('securitySymbol')}</th>
           <th>{$_('securityName')}</th>
           <th class="text-right">{$_('quantity')}</th>
-          <th class="text-right">{$_('costPrice')}</th>
-          <th class="text-right">{$_('currentPrice')}</th>
+          <th class="text-right">{$_('costPrice')}/{$_('currentPrice')}</th>
           <th class="text-right">{$_('marketValue')}</th>
           <th class="text-right">{$_('profitLoss')}</th>
           <th class="text-center">{$_('openDate')}</th>
@@ -186,27 +185,29 @@
             <td class="font-mono text-sm">{position.security_symbol}</td>
             <td>{position.security_name}</td>
             <td class="text-right">{formatQty(position.quantity)}</td>
-            <td class="text-right font-mono text-sm">{formatPrice(position.cost_price)}</td>
-            <td
-              class="text-right font-mono text-sm"
-              role="button"
-              tabindex="0"
-              on:click={() => startEditPrice(position)}
-              on:keydown={(e) => e.key === 'Enter' && startEditPrice(position)}>
-              {#if editingSymbol === position.security_symbol}
-                <input
-                  type="number"
-                  step="0.0001"
-                  class="custom-input w-24 text-right text-sm"
-                  bind:value={editingPrice}
-                  on:blur={() => savePrice(position)}
-                  on:keydown={(e) => handleKeydown(e, position)}
-                  autofocus />
-              {:else}
-                <span class="cursor-pointer hover:text-brand">
-                  {formatPrice(position.current_price)}
-                </span>
-              {/if}
+            <td class="text-right font-mono text-sm">
+              <div>{formatPrice(position.cost_price)}</div>
+              <div>
+                {#if editingSymbol === position.security_symbol}
+                  <input
+                    type="number"
+                    step="0.0001"
+                    class="custom-input w-24 text-right text-sm"
+                    bind:value={editingPrice}
+                    on:blur={() => savePrice(position)}
+                    on:keydown={(e) => handleKeydown(e, position)}
+                    autofocus />
+                {:else}
+                  <span
+                    class="cursor-pointer hover:text-brand"
+                    role="button"
+                    tabindex="0"
+                    on:click={() => startEditPrice(position)}
+                    on:keydown={(e) => e.key === 'Enter' && startEditPrice(position)}>
+                    {formatPrice(position.current_price)}
+                  </span>
+                {/if}
+              </div>
             </td>
             <td class="text-right font-mono text-sm">{formatAmount(position.amount)}</td>
             <td class="text-right font-mono text-sm">
@@ -218,16 +219,16 @@
                 {@const totalPnl = unrealizedPnl + realizedPnl}
                 {@const costBasis = Number(position.cost_price) * Number(position.quantity)}
                 {@const pnlPercent = costBasis > 0 ? (totalPnl / costBasis) * 100 : 0}
-                <span
+                <div
                   class:font-medium={true}
                   class:text-red-600={totalPnl > 0}
                   class:text-green-600={totalPnl < 0}>
-                  {totalPnl > 0 ? '+' : ''}{totalPnl.toLocaleString('zh-CN', {
+                  <div>{totalPnl > 0 ? '+' : ''}{totalPnl.toLocaleString('zh-CN', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  })}
-                  ({pnlPercent > 0 ? '+' : ''}{pnlPercent.toFixed(2)}%)
-                </span>
+                  })}</div>
+                  <div class="text-xs">{pnlPercent > 0 ? '+' : ''}{pnlPercent.toFixed(2)}%</div>
+                </div>
               {:else if position.current_price != null && position.cost_price != null}
                 {@const unrealizedPnl =
                   (Number(position.current_price) - Number(position.cost_price)) *
