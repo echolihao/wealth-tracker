@@ -1,6 +1,6 @@
 import {
   DEFAULT_HOST,
-  DEFAULT_PORT,
+  getDefaultPort,
   getPublicDir,
   getSqliteDbPath,
   parseBooleanEnv,
@@ -26,7 +26,7 @@ export interface ResolvedServerRuntimeOptions {
 
 let runtimeOptions: ResolvedServerRuntimeOptions = {
   host: process.env.HOST || DEFAULT_HOST,
-  port: process.env.PORT ? parseInt(process.env.PORT, 10) : DEFAULT_PORT,
+  port: process.env.PORT ? parseInt(process.env.PORT, 10) : getDefaultPort(),
   publicDir: getPublicDir(),
   dbPath: getSqliteDbPath(),
   allowPassword: parseBooleanEnv(process.env.ALLOW_PASSWORD, false),
@@ -42,7 +42,7 @@ export const resolveRuntimeOptions = (
 ): ResolvedServerRuntimeOptions => {
   return {
     host: options.host || process.env.HOST || DEFAULT_HOST,
-    port: options.port ?? (process.env.PORT ? parseInt(process.env.PORT, 10) : DEFAULT_PORT),
+    port: options.port ?? (process.env.PORT ? parseInt(process.env.PORT, 10) : getDefaultPort()),
     publicDir: options.publicDir || process.env.PUBLIC_DIR || getPublicDir(),
     dbPath: options.dbPath || process.env.SQLITE_DB_PATH || getSqliteDbPath(),
     allowPassword: options.allowPassword ?? parseBooleanEnv(process.env.ALLOW_PASSWORD, false),

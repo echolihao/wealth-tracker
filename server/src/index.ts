@@ -32,12 +32,13 @@ const connectToSqlite = async () => {
 
     await sequelize.sync()
 
+    const db = sequelize
     // 向后兼容迁移：新增列（SQLite 不支持 DROP COLUMN 或 ALTER 大部分操作）
     const addColumnIfNotExists = async (table: string, column: string, def: string) => {
-      const [info] = await sequelize.query(`PRAGMA table_info('${table}')`)
+      const [info] = await db.query(`PRAGMA table_info('${table}')`)
       const columns = (info as any[]).map((c: any) => c.name)
       if (!columns.includes(column)) {
-        await sequelize.query(`ALTER TABLE "${table}" ADD COLUMN ${column} ${def}`)
+        await db.query(`ALTER TABLE "${table}" ADD COLUMN ${column} ${def}`)
         console.log(`  → Added column "${column}" to "${table}"`)
       }
     }
