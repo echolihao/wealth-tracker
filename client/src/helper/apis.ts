@@ -136,6 +136,10 @@ export const updatePositionPrice = (id: number, symbol: string, data: any) => {
   return $ajax.put(genApiPath(`assets/${id}/positions/${symbol}`), data)
 }
 
+export const getPositionTrades = (positionId: number) => {
+  return $ajax.get(genApiPath(`positions/${positionId}/trades`), {})
+}
+
 export const getTrades = (id: number, params?: any) => {
   return $ajax.get(genApiPath(`assets/${id}/trades`), params)
 }

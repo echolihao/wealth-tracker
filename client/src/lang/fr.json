@@ -230,6 +230,7 @@
   "tradePage": "Transactions",
   "positions": "Positions",
   "position": "Position",
+  "positionId": "ID Position",
   "closedPositions": "Clôturé",
   "openPositions": "Ouvert",
   "buy": "Achat",

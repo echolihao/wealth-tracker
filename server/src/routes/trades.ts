@@ -1,6 +1,7 @@
 import {
   getSecuritiesAccounts,
   getPositions,
+  getPositionTrades,
   updatePositionPrice,
   getTrades,
   createTrade,
@@ -20,6 +21,11 @@ export default [
     method: 'GET',
     url: '/api/assets/:id/positions',
     handler: getPositions,
+  },
+  {
+    method: 'GET',
+    url: '/api/positions/:id/trades',
+    handler: getPositionTrades,
   },
   {
     method: 'PUT',

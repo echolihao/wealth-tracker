@@ -35,6 +35,35 @@ export const getPositions = async (request, reply) => {
   }
 }
 
+export const getPositionTrades = async (request, reply) => {
+  const { id } = request.params
+  try {
+    const position = await Position.findByPk(id)
+    if (!position) {
+      return reply.code(404).send({
+        statusCode: 404,
+        message: 'Position not found.',
+      })
+    }
+    const trades = await Trade.findAll({
+      where: { position_id: id },
+      order: [
+        ['trade_date', 'DESC'],
+        ['created', 'DESC'],
+      ],
+    })
+    return reply.send({
+      position,
+      trades,
+    })
+  } catch (error: any) {
+    return reply.code(400).send({
+      statusCode: 400,
+      message: error.message,
+    })
+  }
+}
+
 export const updatePositionPrice = async (request, reply) => {
   const { id, symbol } = request.params
   const { current_price, amount } = request.body
@@ -95,7 +124,10 @@ export const getTrades = async (request, reply) => {
 
     const { count, rows } = await Trade.findAndCountAll({
       where: whereClause,
-      order: [['trade_date', 'DESC'], ['created', 'DESC']],
+      order: [
+        ['trade_date', 'DESC'],
+        ['created', 'DESC'],
+      ],
       offset,
       limit: size,
     })
@@ -186,10 +218,26 @@ export const createTrade = async (request, reply) => {
 
       const costPrice = existing ? Number(existing.cost_price) : price
 
-      // 1. Create trade record
+      // 1. Apply trade effect on position (returns the affected position with its id)
+      const position = await applyTradeEffect(
+        id,
+        params.type,
+        params.security_symbol,
+        params.security_name,
+        quantity,
+        price,
+        amount,
+        t,
+        trade_date,
+        existing,
+        fee,
+      )
+
+      // 2. Create trade record with position_id
       const trade = await Trade.create(
         {
           asset_id: id,
+          position_id: position.id,
           security_symbol: params.security_symbol,
           security_name: params.security_name,
           type: params.type,
@@ -199,90 +247,11 @@ export const createTrade = async (request, reply) => {
           fee,
           trade_date,
           note: params.note || '',
-          realized_pnl:
-            params.type === 'SELL' && existing
-              ? (amount - fee) - costPrice * quantity
-              : null,
+          realized_pnl: params.type === 'SELL' ? amount - fee - costPrice * quantity : null,
           created: new Date(),
         },
         { transaction: t },
       )
-
-      // 2. Update position
-
-      if (params.type === 'BUY') {
-        if (existing && Number(existing.quantity) > 0) {
-          // Existing open position: weighted average update
-          const oldQty = Number(existing.quantity)
-          const oldCost = Number(existing.cost_price)
-          const newQty = oldQty + quantity
-          const newCost = (oldQty * oldCost + amount + fee) / newQty
-          const currentPrice =
-            existing.current_price !== null
-              ? Number(existing.current_price)
-              : price
-          await existing.update(
-            {
-              quantity: newQty,
-              cost_price: newCost,
-              amount: newQty * currentPrice,
-              status: 'Open',
-              updated: new Date(),
-            },
-            { transaction: t },
-          )
-        } else {
-          // No open position exists — create a new one
-          await Position.create(
-            {
-              asset_id: id,
-              security_symbol: params.security_symbol,
-              security_name: params.security_name,
-              quantity,
-              cost_price: (amount + fee) / quantity,
-              current_price: price,
-              amount: amount,
-              realized_pnl: 0,
-              status: 'Open',
-              open_date: trade_date,
-              created: new Date(),
-              updated: new Date(),
-            },
-            { transaction: t },
-          )
-        }
-      } else {
-        // SELL
-        if (!existing) {
-          throw new Error('Position not found for sell.')
-        }
-        const oldQty = Number(existing.quantity)
-        if (quantity > oldQty) {
-          throw new Error(
-            `Insufficient quantity. Available: ${oldQty}, attempting to sell: ${quantity}.`,
-          )
-        }
-        const newQty = oldQty - quantity
-        const costPrice = Number(existing.cost_price)
-        const realizedPnl = (amount - fee) - costPrice * quantity
-        const updateData: any = {
-          quantity: newQty,
-          realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
-          updated: new Date(),
-        }
-        if (newQty === 0) {
-          updateData.status = 'Closed'
-          updateData.close_date = trade_date
-          updateData.amount = 0
-        } else {
-          const currentPrice =
-            existing.current_price !== null
-              ? Number(existing.current_price)
-              : costPrice
-          updateData.amount = newQty * currentPrice
-        }
-        await existing.update(updateData, { transaction: t })
-      }
 
       return trade
     })
@@ -318,7 +287,8 @@ export const updateTrade = async (request, reply) => {
       const newQty = Number(params.quantity ?? oldTrade.quantity)
       const newPrice = Number(params.price ?? oldTrade.price)
       const newAmount = Number(params.amount ?? oldTrade.amount)
-      const newFee = params.fee !== undefined ? Math.max(0, Number(params.fee) || 0) : Number(oldTrade.fee ?? 0)
+      const newFee =
+        params.fee !== undefined ? Math.max(0, Number(params.fee) || 0) : Number(oldTrade.fee ?? 0)
       const newDate = params.trade_date || oldTrade.trade_date
 
       // Query position state before applying new trade (for realized_pnl calculation)
@@ -328,7 +298,7 @@ export const updateTrade = async (request, reply) => {
       })
       const costPriceBefore = posBefore ? Number(posBefore.cost_price) : newPrice
 
-      await applyTradeEffect(
+      const position = await applyTradeEffect(
         oldTrade.asset_id,
         newType,
         newSymbol,
@@ -344,6 +314,7 @@ export const updateTrade = async (request, reply) => {
 
       await Trade.update(
         {
+          position_id: position.id,
           type: newType,
           security_symbol: newSymbol,
           security_name: newName,
@@ -354,9 +325,7 @@ export const updateTrade = async (request, reply) => {
           trade_date: newDate,
           note: params.note !== undefined ? params.note : oldTrade.note,
           realized_pnl:
-            newType === 'SELL' && posBefore
-              ? (newAmount - newFee) - costPriceBefore * newQty
-              : null,
+            newType === 'SELL' && posBefore ? newAmount - newFee - costPriceBefore * newQty : null,
         },
         { where: { id }, transaction: t },
       )
@@ -413,9 +382,7 @@ async function reverseTradeEffect(trade: any, t: any) {
       const oldQty = Number(existing.quantity)
       const newQty = oldQty - qty
       if (newQty < 0) {
-        throw new Error(
-          'Cannot reverse this trade: position quantity would go negative.',
-        )
+        throw new Error('Cannot reverse this trade: position quantity would go negative.')
       }
       const updateData: any = {
         quantity: newQty,
@@ -432,9 +399,7 @@ async function reverseTradeEffect(trade: any, t: any) {
           oldQty > 0 ? (oldQty * oldCost - Number(trade.amount) - tradeFee) / newQty : 0
         updateData.cost_price = restoredCost
         const currentPrice =
-          existing.current_price !== null
-            ? Number(existing.current_price)
-            : price
+          existing.current_price !== null ? Number(existing.current_price) : price
         updateData.amount = newQty * currentPrice
       }
       await existing.update(updateData, { transaction: t })
@@ -483,7 +448,7 @@ async function reverseTradeEffect(trade: any, t: any) {
   }
 }
 
-// Helper: apply a trade's effect on positions
+// Helper: apply a trade's effect on positions, returns the affected position
 async function applyTradeEffect(
   assetId: number,
   type: string,
@@ -496,11 +461,13 @@ async function applyTradeEffect(
   tradeDate?: string,
   existingPosition?: any,
   fee: number = 0,
-) {
-  const existing = existingPosition || await Position.findOne({
-    where: { asset_id: assetId, security_symbol: symbol, status: 'Open' },
-    transaction: t,
-  })
+): Promise<any> {
+  const existing =
+    existingPosition ||
+    (await Position.findOne({
+      where: { asset_id: assetId, security_symbol: symbol, status: 'Open' },
+      transaction: t,
+    }))
 
   if (type === 'BUY') {
     if (existing && Number(existing.quantity) > 0) {
@@ -509,10 +476,7 @@ async function applyTradeEffect(
       const oldCost = Number(existing.cost_price)
       const newQty = oldQty + quantity
       const newCost = (oldQty * oldCost + amount + fee) / newQty
-      const currentPrice =
-        existing.current_price !== null
-          ? Number(existing.current_price)
-          : price
+      const currentPrice = existing.current_price !== null ? Number(existing.current_price) : price
       await existing.update(
         {
           quantity: newQty,
@@ -523,9 +487,10 @@ async function applyTradeEffect(
         },
         { transaction: t },
       )
+      return existing
     } else {
       // No open position exists — create a new one
-      await Position.create(
+      const position = await Position.create(
         {
           asset_id: assetId,
           security_symbol: symbol,
@@ -542,6 +507,7 @@ async function applyTradeEffect(
         },
         { transaction: t },
       )
+      return position
     }
   } else {
     // SELL
@@ -556,7 +522,7 @@ async function applyTradeEffect(
     }
     const newQty = oldQty - quantity
     const costPrice = Number(existing.cost_price)
-    const realizedPnl = (amount - fee) - costPrice * quantity
+    const realizedPnl = amount - fee - costPrice * quantity
     const updateData: any = {
       quantity: newQty,
       realized_pnl: Number(existing.realized_pnl ?? 0) + realizedPnl,
@@ -568,12 +534,11 @@ async function applyTradeEffect(
       updateData.amount = 0
     } else {
       const currentPrice =
-        existing.current_price !== null
-          ? Number(existing.current_price)
-          : costPrice
+        existing.current_price !== null ? Number(existing.current_price) : costPrice
       updateData.amount = newQty * currentPrice
     }
     await existing.update(updateData, { transaction: t })
+    return existing
   }
 }
 
@@ -598,7 +563,10 @@ export const exportTradesCsv = async (request, reply) => {
 
     const rows = await Trade.findAll({
       where: whereClause,
-      order: [['trade_date', 'DESC'], ['created', 'DESC']],
+      order: [
+        ['trade_date', 'DESC'],
+        ['created', 'DESC'],
+      ],
     })
 
     // Build CSV matching import template (BOM for Excel compatibility)
@@ -782,7 +750,11 @@ export const importTrades = async (request, reply) => {
       } else {
         amt = Number(row.amount)
         if (Math.abs(amt - qty * p) > 0.01) {
-          warnings.push({ row: rowNum, field: '金额', message: '金额不等于数量 × 价格，已保留文件中填写的金额' })
+          warnings.push({
+            row: rowNum,
+            field: '金额',
+            message: '金额不等于数量 × 价格，已保留文件中填写的金额',
+          })
         }
       }
 
@@ -820,9 +792,7 @@ export const importTrades = async (request, reply) => {
     }
 
     // 4. Sort by trade_date ascending
-    validated.sort(
-      (a, b) => a.trade_date.localeCompare(b.trade_date),
-    )
+    validated.sort((a, b) => a.trade_date.localeCompare(b.trade_date))
 
     // 5. Execute in transaction
     await sequelize.transaction(async (t) => {
@@ -834,7 +804,7 @@ export const importTrades = async (request, reply) => {
         })
         const costPrice = posBefore ? Number(posBefore.cost_price) : v.price
 
-        await applyTradeEffect(
+        const position = await applyTradeEffect(
           id,
           v.type,
           v.security_symbol,
@@ -851,6 +821,7 @@ export const importTrades = async (request, reply) => {
         await Trade.create(
           {
             asset_id: id,
+            position_id: position.id,
             security_symbol: v.security_symbol,
             security_name: v.security_name,
             type: v.type,
@@ -861,9 +832,7 @@ export const importTrades = async (request, reply) => {
             trade_date: v.trade_date,
             note: v.note,
             realized_pnl:
-              v.type === 'SELL' && posBefore
-                ? (v.amount - v.fee) - costPrice * v.quantity
-                : null,
+              v.type === 'SELL' && posBefore ? v.amount - v.fee - costPrice * v.quantity : null,
             created: new Date(),
           },
           { transaction: t },

@@ -429,6 +429,12 @@
           <span class="text-sm text-gray-500">{$_('assetId')}</span>
           <span class="text-sm font-mono font-medium">{detailTarget.asset_id}</span>
         </div>
+        {#if detailTarget.position_id}
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">{$_('positionId')}</span>
+            <span class="text-sm font-mono font-medium">{detailTarget.position_id}</span>
+          </div>
+        {/if}
         <div class="flex justify-between">
           <span class="text-sm text-gray-500">{$_('tradeDate')}</span>
           <span class="text-sm font-medium">{detailTarget.trade_date}</span>

@@ -4,7 +4,7 @@
   import { Table } from 'flowbite-svelte'
   import SvgIcon from './SvgIcon.svelte'
   import Skeleton from './Skeleton.svelte'
-  import { updatePositionPrice } from '../helper/apis'
+  import { updatePositionPrice, getPositionTrades } from '../helper/apis'
   import { notice } from '../stores'
 
   const dispatch = createEventDispatcher()
@@ -16,6 +16,10 @@
   let editingSymbol: string | null = null
   let editingPrice: string = ''
   let showClosed = false
+  let showTradesModal = false
+  let tradesLoading = false
+  let positionTrades: any[] = []
+  let positionForTrades: any = null
 
   $: totalOpenPnl = openPositions.reduce((sum, p) => {
     const unrealized =
@@ -121,6 +125,29 @@
       editingSymbol = null
     }
   }
+
+  const formatIntAmount = (value: any) => {
+    return Number(value).toLocaleString('zh-CN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
+  }
+
+  const handleViewTrades = async (position: any) => {
+    positionForTrades = position
+    showTradesModal = true
+    tradesLoading = true
+    positionTrades = []
+    try {
+      const result: any = await getPositionTrades(position.id)
+      positionTrades = result.trades || []
+    } catch (error) {
+      console.error('Error fetching position trades:', error)
+      notice.set('获取交易记录失败')
+    } finally {
+      tradesLoading = false
+    }
+  }
 </script>
 
 <div class="w-full">
@@ -139,6 +166,7 @@
     <Table>
       <thead>
         <tr>
+          <th>{$_('positionId')}</th>
           <th>{$_('securitySymbol')}</th>
           <th>{$_('securityName')}</th>
           <th class="text-right">{$_('quantity')}</th>
@@ -154,6 +182,7 @@
       <tbody>
         {#each openPositions as position (position.id)}
           <tr class="hover:bg-gray-50">
+            <td class="text-xs text-gray-400 font-mono">{position.id}</td>
             <td class="font-mono text-sm">{position.security_symbol}</td>
             <td>{position.security_name}</td>
             <td class="text-right">{formatQty(position.quantity)}</td>
@@ -221,12 +250,21 @@
             <td class="text-center text-sm">{formatDate(position.open_date)}</td>
             <td class="text-center text-sm">{getHoldingDays(position)}</td>
             <td class="text-center">
-              <button
-                on:click={() => handleSell(position)}
-                class="rounded px-2 py-1 text-xs font-medium text-white
-                  bg-orange-500 hover:bg-orange-600 transition-colors">
-                {$_('sell')}
-              </button>
+              <div class="flex items-center justify-center gap-1">
+                <button
+                  on:click={() => handleViewTrades(position)}
+                  class="rounded px-2 py-1 text-xs font-medium text-gray-500
+                    border border-gray-300 hover:bg-gray-100 transition-colors"
+                  title="查看关联交易">
+                  {$_('tradeHistory')}
+                </button>
+                <button
+                  on:click={() => handleSell(position)}
+                  class="rounded px-2 py-1 text-xs font-medium text-white
+                    bg-orange-500 hover:bg-orange-600 transition-colors">
+                  {$_('sell')}
+                </button>
+              </div>
             </td>
           </tr>
         {/each}
@@ -245,17 +283,20 @@
         <Table>
           <thead>
             <tr>
+              <th>{$_('positionId')}</th>
               <th>{$_('securitySymbol')}</th>
               <th>{$_('securityName')}</th>
               <th class="text-center">{$_('openDate')}</th>
               <th class="text-center">{$_('closeDate')}</th>
               <th class="text-center">{$_('holdingDays')}</th>
               <th class="text-right">{$_('profitLoss')}</th>
+              <th class="text-center">{$_('action')}</th>
             </tr>
           </thead>
           <tbody>
             {#each closedPositions as position (position.id)}
               <tr class="text-gray-400">
+                <td class="text-xs text-gray-400 font-mono">{position.id}</td>
                 <td class="font-mono text-sm">{position.security_symbol}</td>
                 <td>{position.security_name}</td>
                 <td class="text-center text-sm">{formatDate(position.open_date)}</td>
@@ -266,6 +307,15 @@
                   class:text-red-600={position.realized_pnl > 0}
                   class:text-green-600={position.realized_pnl < 0}>
                   {formatPnl(position.realized_pnl)}
+                </td>
+                <td class="text-center">
+                  <button
+                    on:click={() => handleViewTrades(position)}
+                    class="rounded px-2 py-1 text-xs font-medium text-gray-500
+                      border border-gray-300 hover:bg-gray-100 transition-colors"
+                    title="查看关联交易">
+                    {$_('tradeHistory')}
+                  </button>
                 </td>
               </tr>
             {/each}
@@ -297,3 +347,91 @@
     {/if}
   {/if}
 </div>
+
+<!-- Position trades modal -->
+{#if showTradesModal && positionForTrades}
+  <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+    role="dialog"
+    on:click={() => (showTradesModal = false)}>
+    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+    <div
+      class="mx-4 flex max-h-[80vh] w-full max-w-2xl flex-col rounded-lg bg-white shadow-xl"
+      on:click|stopPropagation>
+      <div class="flex items-center justify-between border-b px-6 py-4">
+        <h3 class="text-base font-semibold">
+          交易记录 — {positionForTrades.security_name} ({positionForTrades.security_symbol})
+          <span class="ml-2 text-sm font-normal text-gray-500">#{positionForTrades.id}</span>
+        </h3>
+        <button
+          on:click={() => (showTradesModal = false)}
+          class="text-gray-400 hover:text-gray-600">
+          <SvgIcon name="close" width={20} height={20} />
+        </button>
+      </div>
+      <div class="overflow-y-auto p-6">
+        {#if tradesLoading}
+          <div class="space-y-2">
+            <Skeleton width="w-full" height="h-8" />
+            <Skeleton width="w-full" height="h-8" />
+          </div>
+        {:else if positionTrades.length === 0}
+          <div class="py-8 text-center text-gray-400">暂无关联交易记录</div>
+        {:else}
+          <Table>
+            <thead>
+              <tr>
+                <th class="text-sm">{$_('tradeDate')}</th>
+                <th class="text-sm">{$_('action')}</th>
+                <th class="text-right text-sm">{$_('quantity')}</th>
+                <th class="text-right text-sm">{$_('price')}</th>
+                <th class="text-right text-sm">{$_('tradeAmount')}</th>
+                <th class="text-right text-sm">{$_('realizedPnl')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each positionTrades as trade (trade.id)}
+                <tr class="hover:bg-gray-50">
+                  <td class="text-sm">{trade.trade_date}</td>
+                  <td>
+                    <span
+                      class="inline-block rounded-full px-2 py-0.5 text-xs font-medium
+                      {trade.type === 'BUY'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-orange-100 text-orange-700'}">
+                      {trade.type === 'BUY' ? $_('buy') : $_('sell')}
+                    </span>
+                  </td>
+                  <td class="text-right font-mono text-sm">
+                    {Number(trade.quantity).toLocaleString()}
+                  </td>
+                  <td class="text-right font-mono text-sm">
+                    {Number(trade.price).toLocaleString('zh-CN', {
+                      minimumFractionDigits: 3,
+                      maximumFractionDigits: 3,
+                    })}
+                  </td>
+                  <td class="text-right font-mono text-sm">
+                    {formatIntAmount(trade.amount)}
+                  </td>
+                  <td class="text-right font-mono text-sm">
+                    {#if trade.realized_pnl != null}
+                      <span
+                        class:text-red-600={Number(trade.realized_pnl) >= 0}
+                        class:text-green-600={Number(trade.realized_pnl) < 0}>
+                        {Number(trade.realized_pnl) >= 0 ? '+' : ''}{formatIntAmount(trade.realized_pnl)}
+                      </span>
+                    {:else}
+                      —
+                    {/if}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </Table>
+        {/if}
+      </div>
+    </div>
+  </div>
+{/if}

@@ -230,6 +230,7 @@
   "tradePage": "取引記録",
   "positions": "ポジション",
   "position": "ポジション",
+  "positionId": "ポジションID",
   "closedPositions": "決済済み",
   "openPositions": "保有中",
   "buy": "買い",

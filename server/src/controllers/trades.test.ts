@@ -69,6 +69,7 @@ function mockReply() {
 
 function makePositionInstance(overrides: Record<string, any> = {}) {
   const instance: any = {
+    id: 1,
     realized_pnl: 0,
     ...overrides,
     update: vi.fn().mockImplementation(function (this: any, data: any) {
@@ -109,6 +110,8 @@ beforeEach(() => {
   // between tests.
   vi.resetAllMocks()
   mockSequelizeTransaction.mockImplementation(defaultTransactionImpl)
+  // Position.create 在 applyTradeEffect 中被调用，需要返回有 id 的对象
+  mockPositionCreate.mockResolvedValue(makePositionInstance({ id: 1 }))
 })
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -802,7 +805,7 @@ describe('createTrade', () => {
     })
 
     it('should handle database errors', async () => {
-      mockTradeCreate.mockRejectedValue(new Error('DB error'))
+      mockPositionFindOne.mockRejectedValue(new Error('DB error'))
       const reply = mockReply()
 
       await tradesCtrl.createTrade(makeRequest() as any, reply)

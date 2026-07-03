@@ -230,6 +230,7 @@
   "tradePage": "交易記錄",
   "positions": "持倉",
   "position": "持倉",
+  "positionId": "持倉ID",
   "closedPositions": "已平倉",
   "openPositions": "持倉中",
   "buy": "買入",

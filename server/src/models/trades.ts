@@ -4,6 +4,7 @@ import { sequelize } from './index'
 export class Trade extends Model {
   declare id: number
   declare asset_id: number
+  declare position_id: number | null
   declare security_symbol: string
   declare security_name: string
   declare type: string
@@ -27,6 +28,10 @@ Trade.init(
     asset_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    position_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     security_symbol: {
       type: DataTypes.STRING,
