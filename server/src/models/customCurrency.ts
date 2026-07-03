@@ -59,4 +59,3 @@ CustomCurrency.init(
 )
 
 export default CustomCurrency
-

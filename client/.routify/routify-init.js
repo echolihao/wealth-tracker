@@ -1,4 +1,3 @@
-
 import { appInstance, preloadUrl } from '@roxi/routify'
 import { map } from './route-map.js'
 
@@ -8,11 +7,11 @@ appInstance.routeMaps = map
 import * as module from '../src/App.svelte'
 
 Promise.all([
-    module.load?.(),
-    // PreloadUrl parses the url and preloads each url chunk in a router that matches its name. So for '/hello;widget=/world',
-    // it will preload '/hello' in the default router and '/world' in the 'widget' router.
-    // If the respective routers don't exist, preloadUrl will use routesMap to pre-create a router and match it with the url chunk.
-    preloadUrl({ routesMap: map })
+  module.load?.(),
+  // PreloadUrl parses the url and preloads each url chunk in a router that matches its name. So for '/hello;widget=/world',
+  // it will preload '/hello' in the default router and '/world' in the 'widget' router.
+  // If the respective routers don't exist, preloadUrl will use routesMap to pre-create a router and match it with the url chunk.
+  preloadUrl({ routesMap: map }),
 ])
 
 export const app = import('../src/main.js')

@@ -55,83 +55,421 @@ interface TradeFixture {
 
 /** 恒指科技 — 9 条交易，2 次完整开平仓循环 */
 const TRADES_513180: TradeFixture[] = [
-  { type: 'BUY',  security_symbol: '513180', security_name: '恒指科技', quantity: 215400, price: 0.812, amount: 174904.8, fee: 43.73, trade_date: '2025-03-17', note: '买入' },
-  { type: 'BUY',  security_symbol: '513180', security_name: '恒指科技', quantity: 212600, price: 0.822, amount: 174757.2, fee: 43.69, trade_date: '2025-03-18', note: '买入' },
-  { type: 'SELL', security_symbol: '513180', security_name: '恒指科技', quantity: 428000, price: 0.737, amount: 315436,   fee: 78.86, trade_date: '2025-03-31', note: '卖出' },
-  { type: 'BUY',  security_symbol: '513180', security_name: '恒指科技', quantity: 156100, price: 0.673, amount: 105055.3, fee: 26.26, trade_date: '2025-04-07', note: '买入' },
-  { type: 'BUY',  security_symbol: '513180', security_name: '恒指科技', quantity: 289000, price: 0.693, amount: 200277.0, fee: 50.07, trade_date: '2025-04-28', note: '买入' },
-  { type: 'BUY',  security_symbol: '513180', security_name: '恒指科技', quantity: 209900, price: 0.721, amount: 151337.9, fee: 37.83, trade_date: '2025-05-13', note: '买入' },
-  { type: 'BUY',  security_symbol: '513180', security_name: '恒指科技', quantity: 161900, price: 0.701, amount: 113491.9, fee: 28.37, trade_date: '2025-05-30', note: '买入' },
-  { type: 'BUY',  security_symbol: '513180', security_name: '恒指科技', quantity: 58800,  price: 0.768, amount: 45158.4,  fee: 11.29, trade_date: '2025-08-28', note: '买入' },
-  { type: 'SELL', security_symbol: '513180', security_name: '恒指科技', quantity: 583800, price: 0.627, amount: 366042.6, fee: 91.51, trade_date: '2026-05-15', note: '卖出' },
+  {
+    type: 'BUY',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 215400,
+    price: 0.812,
+    amount: 174904.8,
+    fee: 43.73,
+    trade_date: '2025-03-17',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 212600,
+    price: 0.822,
+    amount: 174757.2,
+    fee: 43.69,
+    trade_date: '2025-03-18',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 428000,
+    price: 0.737,
+    amount: 315436,
+    fee: 78.86,
+    trade_date: '2025-03-31',
+    note: '卖出',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 156100,
+    price: 0.673,
+    amount: 105055.3,
+    fee: 26.26,
+    trade_date: '2025-04-07',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 289000,
+    price: 0.693,
+    amount: 200277.0,
+    fee: 50.07,
+    trade_date: '2025-04-28',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 209900,
+    price: 0.721,
+    amount: 151337.9,
+    fee: 37.83,
+    trade_date: '2025-05-13',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 161900,
+    price: 0.701,
+    amount: 113491.9,
+    fee: 28.37,
+    trade_date: '2025-05-30',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 58800,
+    price: 0.768,
+    amount: 45158.4,
+    fee: 11.29,
+    trade_date: '2025-08-28',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '513180',
+    security_name: '恒指科技',
+    quantity: 583800,
+    price: 0.627,
+    amount: 366042.6,
+    fee: 91.51,
+    trade_date: '2026-05-15',
+    note: '卖出',
+  },
 ]
 
 /** 恒指科技 — 第3条卖出是第二轮的第一次清仓（最后一笔在下面单独处理） */
-const TRADES_513180_FINAL_SELL: TradeFixture =
-  { type: 'SELL', security_symbol: '513180', security_name: '恒指科技', quantity: 291900, price: 0.628, amount: 183313.2, fee: 45.83, trade_date: '2026-05-15', note: '卖出' }
+const TRADES_513180_FINAL_SELL: TradeFixture = {
+  type: 'SELL',
+  security_symbol: '513180',
+  security_name: '恒指科技',
+  quantity: 291900,
+  price: 0.628,
+  amount: 183313.2,
+  fee: 45.83,
+  trade_date: '2026-05-15',
+  note: '卖出',
+}
 
 /** 恒生医疗 — 7 条交易，1 次完整开平仓 */
 const TRADES_513060: TradeFixture[] = [
-  { type: 'BUY',  security_symbol: '513060', security_name: '恒生医疗', quantity: 70000,  price: 0.501, amount: 35070,   fee: 8.77,  trade_date: '2025-04-01', note: '买入' },
-  { type: 'BUY',  security_symbol: '513060', security_name: '恒生医疗', quantity: 140200, price: 0.5,   amount: 70100,   fee: 17.53, trade_date: '2025-04-01', note: '买入' },
-  { type: 'BUY',  security_symbol: '513060', security_name: '恒生医疗', quantity: 400000, price: 0.48,  amount: 192000,  fee: 48,    trade_date: '2025-04-28', note: '买入' },
-  { type: 'BUY',  security_symbol: '513060', security_name: '恒生医疗', quantity: 300000, price: 0.684, amount: 205200,  fee: 51.3,  trade_date: '2025-07-29', note: '买入' },
-  { type: 'BUY',  security_symbol: '513060', security_name: '恒生医疗', quantity: 66200,  price: 0.682, amount: 45148.4,  fee: 11.29, trade_date: '2025-08-28', note: '买入' },
-  { type: 'SELL', security_symbol: '513060', security_name: '恒生医疗', quantity: 325400, price: 0.659, amount: 214438.6, fee: 53.61, trade_date: '2025-10-28', note: '卖出' },
-  { type: 'SELL', security_symbol: '513060', security_name: '恒生医疗', quantity: 651000, price: 0.537, amount: 349587,   fee: 87.4,  trade_date: '2026-05-15', note: '卖出' },
+  {
+    type: 'BUY',
+    security_symbol: '513060',
+    security_name: '恒生医疗',
+    quantity: 70000,
+    price: 0.501,
+    amount: 35070,
+    fee: 8.77,
+    trade_date: '2025-04-01',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513060',
+    security_name: '恒生医疗',
+    quantity: 140200,
+    price: 0.5,
+    amount: 70100,
+    fee: 17.53,
+    trade_date: '2025-04-01',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513060',
+    security_name: '恒生医疗',
+    quantity: 400000,
+    price: 0.48,
+    amount: 192000,
+    fee: 48,
+    trade_date: '2025-04-28',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513060',
+    security_name: '恒生医疗',
+    quantity: 300000,
+    price: 0.684,
+    amount: 205200,
+    fee: 51.3,
+    trade_date: '2025-07-29',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513060',
+    security_name: '恒生医疗',
+    quantity: 66200,
+    price: 0.682,
+    amount: 45148.4,
+    fee: 11.29,
+    trade_date: '2025-08-28',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '513060',
+    security_name: '恒生医疗',
+    quantity: 325400,
+    price: 0.659,
+    amount: 214438.6,
+    fee: 53.61,
+    trade_date: '2025-10-28',
+    note: '卖出',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '513060',
+    security_name: '恒生医疗',
+    quantity: 651000,
+    price: 0.537,
+    amount: 349587,
+    fee: 87.4,
+    trade_date: '2026-05-15',
+    note: '卖出',
+  },
 ]
 
 /** 恒生消费 — 6 条交易，1 次完整开平仓（含 amount ≠ qty × price 偏差） */
 const TRADES_513970: TradeFixture[] = [
-  { type: 'BUY',  security_symbol: '513970', security_name: '恒生消费', quantity: 112800, price: 0.932, amount: 105129.6, fee: 26.28, trade_date: '2025-04-01', note: '买入' },
-  { type: 'BUY',  security_symbol: '513970', security_name: '恒生消费', quantity: 17400,  price: 0.909, amount: 15816.6,  fee: 5,     trade_date: '2025-04-28', note: '买入' },
-  { type: 'BUY',  security_symbol: '513970', security_name: '恒生消费', quantity: 150000, price: 0.909, amount: 136350,   fee: 34.09, trade_date: '2025-04-29', note: '买入' },
-  { type: 'BUY',  security_symbol: '513970', security_name: '恒生消费', quantity: 43400,  price: 1.039, amount: 45092.6,  fee: 11.27, trade_date: '2025-08-28', note: '买入' },
-  { type: 'SELL', security_symbol: '513970', security_name: '恒生消费', quantity: 107800, price: 0.981, amount: 105751.8, fee: 26.44, trade_date: '2025-10-28', note: '卖出' },
-  { type: 'SELL', security_symbol: '513970', security_name: '恒生消费', quantity: 215800, price: 0.854, amount: 184293.2, fee: 46.07, trade_date: '2026-05-15', note: '卖出' },
+  {
+    type: 'BUY',
+    security_symbol: '513970',
+    security_name: '恒生消费',
+    quantity: 112800,
+    price: 0.932,
+    amount: 105129.6,
+    fee: 26.28,
+    trade_date: '2025-04-01',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513970',
+    security_name: '恒生消费',
+    quantity: 17400,
+    price: 0.909,
+    amount: 15816.6,
+    fee: 5,
+    trade_date: '2025-04-28',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513970',
+    security_name: '恒生消费',
+    quantity: 150000,
+    price: 0.909,
+    amount: 136350,
+    fee: 34.09,
+    trade_date: '2025-04-29',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '513970',
+    security_name: '恒生消费',
+    quantity: 43400,
+    price: 1.039,
+    amount: 45092.6,
+    fee: 11.27,
+    trade_date: '2025-08-28',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '513970',
+    security_name: '恒生消费',
+    quantity: 107800,
+    price: 0.981,
+    amount: 105751.8,
+    fee: 26.44,
+    trade_date: '2025-10-28',
+    note: '卖出',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '513970',
+    security_name: '恒生消费',
+    quantity: 215800,
+    price: 0.854,
+    amount: 184293.2,
+    fee: 46.07,
+    trade_date: '2026-05-15',
+    note: '卖出',
+  },
 ]
 
 /** 芯片ETF — 6 条交易，3 次开平仓循环（前2次已平，第3次仍 Open） */
 const TRADES_159995: TradeFixture[] = [
-  { type: 'BUY',  security_symbol: '159995', security_name: '芯片ETF', quantity: 169700, price: 1.885, amount: 319884.5, fee: 79.97,  trade_date: '2025-10-28', note: '买入' },
-  { type: 'BUY',  security_symbol: '159995', security_name: '芯片ETF', quantity: 154200, price: 2.341, amount: 360982.2, fee: 90.25,  trade_date: '2026-05-18', note: '买入' },
-  { type: 'SELL', security_symbol: '159995', security_name: '芯片ETF', quantity: 323900, price: 2.528, amount: 818819.2, fee: 204.7,  trade_date: '2026-05-29', note: '卖出' },
-  { type: 'BUY',  security_symbol: '159995', security_name: '芯片ETF', quantity: 157800, price: 2.441, amount: 385189.8, fee: 96.3,   trade_date: '2026-06-03', note: '买入' },
-  { type: 'SELL', security_symbol: '159995', security_name: '芯片ETF', quantity: 157800, price: 2.833, amount: 447047.4, fee: 111.76, trade_date: '2026-06-23', note: '卖出' },
-  { type: 'BUY',  security_symbol: '159995', security_name: '芯片ETF', quantity: 130300, price: 3.052, amount: 397675.6, fee: 99.42,  trade_date: '2026-06-25', note: '买入' },
+  {
+    type: 'BUY',
+    security_symbol: '159995',
+    security_name: '芯片ETF',
+    quantity: 169700,
+    price: 1.885,
+    amount: 319884.5,
+    fee: 79.97,
+    trade_date: '2025-10-28',
+    note: '买入',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '159995',
+    security_name: '芯片ETF',
+    quantity: 154200,
+    price: 2.341,
+    amount: 360982.2,
+    fee: 90.25,
+    trade_date: '2026-05-18',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '159995',
+    security_name: '芯片ETF',
+    quantity: 323900,
+    price: 2.528,
+    amount: 818819.2,
+    fee: 204.7,
+    trade_date: '2026-05-29',
+    note: '卖出',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '159995',
+    security_name: '芯片ETF',
+    quantity: 157800,
+    price: 2.441,
+    amount: 385189.8,
+    fee: 96.3,
+    trade_date: '2026-06-03',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '159995',
+    security_name: '芯片ETF',
+    quantity: 157800,
+    price: 2.833,
+    amount: 447047.4,
+    fee: 111.76,
+    trade_date: '2026-06-23',
+    note: '卖出',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '159995',
+    security_name: '芯片ETF',
+    quantity: 130300,
+    price: 3.052,
+    amount: 397675.6,
+    fee: 99.42,
+    trade_date: '2026-06-25',
+    note: '买入',
+  },
 ]
 
 /** 通信ETF — 4 条交易，2 次独立开平仓 */
 const TRADES_515880: TradeFixture[] = [
-  { type: 'BUY',  security_symbol: '515880', security_name: '通信ETF', quantity: 227000, price: 1.694, amount: 384428.1, fee: 96.11,  trade_date: '2026-06-03', note: '买入' },
-  { type: 'SELL', security_symbol: '515880', security_name: '通信ETF', quantity: 227000, price: 1.785, amount: 405195,   fee: 101.3,  trade_date: '2026-06-23', note: '卖出' },
-  { type: 'BUY',  security_symbol: '515880', security_name: '通信ETF', quantity: 223700, price: 1.824, amount: 407954.2, fee: 101.99, trade_date: '2026-06-25', note: '买入' },
-  { type: 'SELL', security_symbol: '515880', security_name: '通信ETF', quantity: 223700, price: 1.72,  amount: 384764,   fee: 96.19,  trade_date: '2026-06-30', note: '卖出' },
+  {
+    type: 'BUY',
+    security_symbol: '515880',
+    security_name: '通信ETF',
+    quantity: 227000,
+    price: 1.694,
+    amount: 384428.1,
+    fee: 96.11,
+    trade_date: '2026-06-03',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '515880',
+    security_name: '通信ETF',
+    quantity: 227000,
+    price: 1.785,
+    amount: 405195,
+    fee: 101.3,
+    trade_date: '2026-06-23',
+    note: '卖出',
+  },
+  {
+    type: 'BUY',
+    security_symbol: '515880',
+    security_name: '通信ETF',
+    quantity: 223700,
+    price: 1.824,
+    amount: 407954.2,
+    fee: 101.99,
+    trade_date: '2026-06-25',
+    note: '买入',
+  },
+  {
+    type: 'SELL',
+    security_symbol: '515880',
+    security_name: '通信ETF',
+    quantity: 223700,
+    price: 1.72,
+    amount: 384764,
+    fee: 96.19,
+    trade_date: '2026-06-30',
+    note: '卖出',
+  },
 ]
 
 /** 科创半导体ETF — 1 条交易，仍在 Open */
 const TRADES_588170: TradeFixture[] = [
-  { type: 'BUY', security_symbol: '588170', security_name: '科创半导体ETF', quantity: 74700, price: 4.02, amount: 300294, fee: 75.07, trade_date: '2026-06-30', note: '买入' },
+  {
+    type: 'BUY',
+    security_symbol: '588170',
+    security_name: '科创半导体ETF',
+    quantity: 74700,
+    price: 4.02,
+    amount: 300294,
+    fee: 75.07,
+    trade_date: '2026-06-30',
+    note: '买入',
+  },
 ]
 
 // ── 从测试数据库提取的已平仓预期值 ─────────────────────────────────────
 
 /** 测试数据库中已平仓 Position 的最终状态（用于最终验证） */
-const EXPECTED_CLOSED_POSITIONS: Record<string, Array<{
-  realized_pnl: number
-  status: string
-  quantity: number
-}>> = {
+const EXPECTED_CLOSED_POSITIONS: Record<
+  string,
+  Array<{
+    realized_pnl: number
+    status: string
+    quantity: number
+  }>
+> = {
   '513180': [
     { realized_pnl: -34392.28, status: 'Closed', quantity: 0 },
     { realized_pnl: -66255.86, status: 'Closed', quantity: 0 },
   ],
-  '513060': [
-    { realized_pnl: 16229.30, status: 'Closed', quantity: 0 },
-  ],
-  '513970': [
-    { realized_pnl: -12492.95, status: 'Closed', quantity: 0 },
-  ],
+  '513060': [{ realized_pnl: 16229.3, status: 'Closed', quantity: 0 }],
+  '513970': [{ realized_pnl: -12492.95, status: 'Closed', quantity: 0 }],
   '159995': [
     { realized_pnl: 137577.58, status: 'Closed', quantity: 0 },
     { realized_pnl: 61649.54, status: 'Closed', quantity: 0 },
@@ -182,7 +520,9 @@ async function executeTrades(trades: TradeFixture[]) {
     await tradesCtrl.createTrade(makeRequest(t), reply)
     if (reply.code.mock.calls.length > 0) {
       const errorBody = reply.code.mock.results[0]?.value?.send?.mock?.calls?.[0]?.[0]
-      errors.push(`Trade ${t.type} ${t.security_symbol} qty=${t.quantity}: ${JSON.stringify(errorBody)}`)
+      errors.push(
+        `Trade ${t.type} ${t.security_symbol} qty=${t.quantity}: ${JSON.stringify(errorBody)}`,
+      )
     }
   }
   return errors
@@ -207,7 +547,10 @@ async function getAllPositions(symbol: string) {
 async function getAllTrades(symbol: string) {
   return Trade.findAll({
     where: { asset_id: 1, security_symbol: symbol },
-    order: [['trade_date', 'ASC'], ['id', 'ASC']],
+    order: [
+      ['trade_date', 'ASC'],
+      ['id', 'ASC'],
+    ],
   })
 }
 
@@ -220,14 +563,14 @@ describe('513180 恒指科技 — 两次开平仓循环', () => {
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('513180')
-    const closedPos = positions.find(p => p.status === 'Closed')
+    const closedPos = positions.find((p) => p.status === 'Closed')
     expect(closedPos).toBeDefined()
     expect(closedPos!.quantity).toBe(0)
     expect(closedPos!.realized_pnl).toBeCloseTo(-34392.28, 1)
 
     // 验证 SELL trade 的 realized_pnl
     const trades = await getAllTrades('513180')
-    const sellTrade = trades.find(t => t.type === 'SELL')
+    const sellTrade = trades.find((t) => t.type === 'SELL')
     expect(sellTrade).toBeDefined()
     expect(sellTrade!.realized_pnl).toBeCloseTo(-34392.28, 1)
   })
@@ -244,7 +587,7 @@ describe('513180 恒指科技 — 两次开平仓循环', () => {
 
     // 第二轮第一次 SELL 的 trade realized_pnl 验证
     const trades = await getAllTrades('513180')
-    const sellTrades = trades.filter(t => t.type === 'SELL')
+    const sellTrades = trades.filter((t) => t.type === 'SELL')
     expect(sellTrades.length).toBe(2)
     // 第一轮 SELL: realized_pnl = -34392.28
     expect(sellTrades[0].realized_pnl).toBeCloseTo(-34392.28, 1)
@@ -256,7 +599,7 @@ describe('513180 恒指科技 — 两次开平仓循环', () => {
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('513180')
-    const closedPositions = positions.filter(p => p.status === 'Closed')
+    const closedPositions = positions.filter((p) => p.status === 'Closed')
     expect(closedPositions.length).toBe(2)
 
     // 按创建顺序：第一个 Closed position realized_pnl = -34392.28
@@ -290,16 +633,16 @@ describe('513060 恒生医疗 — 多笔买入加权平均 + 两次卖出清仓'
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('513060')
-    const closedPos = positions.find(p => p.status === 'Closed')
+    const closedPos = positions.find((p) => p.status === 'Closed')
     expect(closedPos).toBeDefined()
     expect(closedPos!.quantity).toBe(0)
-    expect(closedPos!.realized_pnl).toBeCloseTo(16229.30, 1)
+    expect(closedPos!.realized_pnl).toBeCloseTo(16229.3, 1)
 
     // 验证所有 SELL trade 的 realized_pnl 之和等于 position 的 realized_pnl
     const trades = await getAllTrades('513060')
-    const sellTrades = trades.filter(t => t.type === 'SELL')
+    const sellTrades = trades.filter((t) => t.type === 'SELL')
     const totalRealizedPnl = sellTrades.reduce((sum, t) => sum + Number(t.realized_pnl ?? 0), 0)
-    expect(totalRealizedPnl).toBeCloseTo(16229.30, 1)
+    expect(totalRealizedPnl).toBeCloseTo(16229.3, 1)
   })
 
   it('第一笔SELL后应有已实现盈亏累加', async () => {
@@ -312,7 +655,7 @@ describe('513060 恒生医疗 — 多笔买入加权平均 + 两次卖出清仓'
     expect(pos!.quantity).toBe(651000)
     // realized_pnl 应为第一笔 SELL 的值
     const trades = await getAllTrades('513060')
-    const sellTrade = trades.find(t => t.type === 'SELL')
+    const sellTrade = trades.find((t) => t.type === 'SELL')
     expect(sellTrade).toBeDefined()
     expect(pos!.realized_pnl).toBeCloseTo(Number(sellTrade!.realized_pnl), 1)
   })
@@ -324,7 +667,7 @@ describe('513970 恒生消费 — 含 amount 偏差的买卖', () => {
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('513970')
-    const closedPos = positions.find(p => p.status === 'Closed')
+    const closedPos = positions.find((p) => p.status === 'Closed')
     expect(closedPos).toBeDefined()
     expect(closedPos!.quantity).toBe(0)
     expect(closedPos!.realized_pnl).toBeCloseTo(-12492.95, 1)
@@ -359,7 +702,7 @@ describe('159995 芯片ETF — 多次开平仓循环', () => {
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('159995')
-    const closedPos = positions.find(p => p.status === 'Closed')
+    const closedPos = positions.find((p) => p.status === 'Closed')
     expect(closedPos).toBeDefined()
     expect(closedPos!.realized_pnl).toBeCloseTo(137577.58, 1)
 
@@ -373,7 +716,7 @@ describe('159995 芯片ETF — 多次开平仓循环', () => {
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('159995')
-    const closedPositions = positions.filter(p => p.status === 'Closed')
+    const closedPositions = positions.filter((p) => p.status === 'Closed')
     expect(closedPositions.length).toBe(2)
     expect(closedPositions[0].realized_pnl).toBeCloseTo(137577.58, 1)
     expect(closedPositions[1].realized_pnl).toBeCloseTo(61649.54, 1)
@@ -386,7 +729,7 @@ describe('159995 芯片ETF — 多次开平仓循环', () => {
     const positions = await getAllPositions('159995')
     expect(positions.length).toBe(3) // 2 Closed + 1 Open
 
-    const openPos = positions.find(p => p.status === 'Open')
+    const openPos = positions.find((p) => p.status === 'Open')
     expect(openPos).toBeDefined()
     expect(openPos!.quantity).toBe(130300)
     expect(openPos!.realized_pnl).toBe(0) // 新开仓无已实现盈亏
@@ -406,16 +749,16 @@ describe('515880 通信ETF — 两次独立买卖', () => {
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('515880')
-    const closedPos = positions.find(p => p.status === 'Closed')
+    const closedPos = positions.find((p) => p.status === 'Closed')
     expect(closedPos).toBeDefined()
     expect(closedPos!.realized_pnl).toBeCloseTo(20569.49, 1)
 
     // 验证 SELL trade 的 realized_pnl
     const trades = await getAllTrades('515880')
-    const sellTrade = trades.find(t => t.type === 'SELL')
+    const sellTrade = trades.find((t) => t.type === 'SELL')
     expect(sellTrade).toBeDefined()
     // realized_pnl = (amount - fee) - cost_price * quantity
-    const expectedPnl = (405195 - 101.3) - ((384428.1 + 96.11) / 227000) * 227000
+    const expectedPnl = 405195 - 101.3 - ((384428.1 + 96.11) / 227000) * 227000
     expect(sellTrade!.realized_pnl).toBeCloseTo(expectedPnl, 1)
   })
 
@@ -424,14 +767,14 @@ describe('515880 通信ETF — 两次独立买卖', () => {
     expect(errors).toEqual([])
 
     const positions = await getAllPositions('515880')
-    const closedPositions = positions.filter(p => p.status === 'Closed')
+    const closedPositions = positions.filter((p) => p.status === 'Closed')
     expect(closedPositions.length).toBe(2)
     expect(closedPositions[0].realized_pnl).toBeCloseTo(20569.49, 1)
     expect(closedPositions[1].realized_pnl).toBeCloseTo(-23388.38, 1)
 
     // 验证第二轮 SELL 的 realized_pnl
     const trades = await getAllTrades('515880')
-    const sellTrades = trades.filter(t => t.type === 'SELL')
+    const sellTrades = trades.filter((t) => t.type === 'SELL')
     expect(sellTrades.length).toBe(2)
     expect(sellTrades[1].realized_pnl).toBeCloseTo(-23388.38, 1)
   })
@@ -470,7 +813,8 @@ describe('588170 科创半导体ETF — 单笔买入仍在持仓', () => {
 describe('综合验证', () => {
   it('执行全部34条交易后，所有已平仓数据应与测试数据库一致', async () => {
     const allTrades: TradeFixture[] = [
-      ...TRADES_513180, TRADES_513180_FINAL_SELL,
+      ...TRADES_513180,
+      TRADES_513180_FINAL_SELL,
       ...TRADES_513060,
       ...TRADES_513970,
       ...TRADES_159995,
@@ -486,15 +830,15 @@ describe('综合验证', () => {
 
     // 验证持仓总数
     const allPositions = await Position.findAll({ order: [['id', 'ASC']] })
-    const closedPositions = allPositions.filter(p => p.status === 'Closed')
-    const openPositions = allPositions.filter(p => p.status === 'Open')
+    const closedPositions = allPositions.filter((p) => p.status === 'Closed')
+    const openPositions = allPositions.filter((p) => p.status === 'Open')
 
     expect(closedPositions.length).toBe(8)
     expect(openPositions.length).toBe(2)
 
     // 验证每个 symbol 的已平仓数据
     for (const [symbol, expectedList] of Object.entries(EXPECTED_CLOSED_POSITIONS)) {
-      const symbolClosedPositions = closedPositions.filter(p => p.security_symbol === symbol)
+      const symbolClosedPositions = closedPositions.filter((p) => p.security_symbol === symbol)
       expect(symbolClosedPositions.length).toBe(expectedList.length)
 
       for (let i = 0; i < expectedList.length; i++) {
@@ -507,12 +851,12 @@ describe('综合验证', () => {
     }
 
     // 验证 Open 持仓
-    const open159995 = openPositions.find(p => p.security_symbol === '159995')
+    const open159995 = openPositions.find((p) => p.security_symbol === '159995')
     expect(open159995).toBeDefined()
     expect(open159995!.quantity).toBe(130300)
     expect(open159995!.realized_pnl).toBe(0)
 
-    const open588170 = openPositions.find(p => p.security_symbol === '588170')
+    const open588170 = openPositions.find((p) => p.security_symbol === '588170')
     expect(open588170).toBeDefined()
     expect(open588170!.quantity).toBe(74700)
     expect(open588170!.realized_pnl).toBe(0)
@@ -520,7 +864,8 @@ describe('综合验证', () => {
 
   it('每笔 SELL trade 的 realized_pnl 不应为 null', async () => {
     const allTrades: TradeFixture[] = [
-      ...TRADES_513180, TRADES_513180_FINAL_SELL,
+      ...TRADES_513180,
+      TRADES_513180_FINAL_SELL,
       ...TRADES_513060,
       ...TRADES_513970,
       ...TRADES_159995,
@@ -543,7 +888,8 @@ describe('综合验证', () => {
 
   it('每笔 BUY trade 的 realized_pnl 应为 null', async () => {
     const allTrades: TradeFixture[] = [
-      ...TRADES_513180, TRADES_513180_FINAL_SELL,
+      ...TRADES_513180,
+      TRADES_513180_FINAL_SELL,
       ...TRADES_513060,
       ...TRADES_513970,
       ...TRADES_159995,
@@ -565,7 +911,8 @@ describe('综合验证', () => {
 
   it('Position 的 realized_pnl 应等于其所有 SELL trade realized_pnl 之和', async () => {
     const allTrades: TradeFixture[] = [
-      ...TRADES_513180, TRADES_513180_FINAL_SELL,
+      ...TRADES_513180,
+      TRADES_513180_FINAL_SELL,
       ...TRADES_513060,
       ...TRADES_513970,
       ...TRADES_159995,

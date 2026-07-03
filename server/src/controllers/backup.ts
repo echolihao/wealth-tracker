@@ -31,15 +31,16 @@ const genInsightKey = (item: any) => {
 
 export const exportData = async (_, reply) => {
   try {
-    const [assets, records, insights, goals, customCurrencies, positions, trades] = await Promise.all([
-      Assets.findAll({ raw: true }),
-      Record.findAll({ raw: true }),
-      Insight.findAll({ raw: true }),
-      Goal.findAll({ raw: true }),
-      CustomCurrency.findAll({ raw: true }),
-      Position.findAll({ raw: true }),
-      Trade.findAll({ raw: true }),
-    ])
+    const [assets, records, insights, goals, customCurrencies, positions, trades] =
+      await Promise.all([
+        Assets.findAll({ raw: true }),
+        Record.findAll({ raw: true }),
+        Insight.findAll({ raw: true }),
+        Goal.findAll({ raw: true }),
+        CustomCurrency.findAll({ raw: true }),
+        Position.findAll({ raw: true }),
+        Trade.findAll({ raw: true }),
+      ])
 
     return reply.send({
       app: BACKUP_APP_NAME,
@@ -67,7 +68,15 @@ export const importData = async (request, reply) => {
   }
 
   try {
-    const counts = { assets: 0, records: 0, insights: 0, goals: 0, customCurrencies: 0, positions: 0, trades: 0 }
+    const counts = {
+      assets: 0,
+      records: 0,
+      insights: 0,
+      goals: 0,
+      customCurrencies: 0,
+      positions: 0,
+      trades: 0,
+    }
 
     if (Array.isArray(data.assets)) {
       for (const item of data.assets) {

@@ -8,10 +8,7 @@ import { parseBooleanEnv } from '../helper/constant'
  * either directly or through a reverse proxy (e.g. Nginx).
  */
 const isRequestSecure = (request: FastifyRequest): boolean => {
-  return (
-    request.protocol === 'https' ||
-    request.headers['x-forwarded-proto'] === 'https'
-  )
+  return request.protocol === 'https' || request.headers['x-forwarded-proto'] === 'https'
 }
 
 /**

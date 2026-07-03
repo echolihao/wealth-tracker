@@ -1,9 +1,10 @@
-export const pick = (obj, arr) => arr.reduce((iter, val) => (val in obj && (iter[val] = obj[val]), iter), {})
+export const pick = (obj, arr) =>
+  arr.reduce((iter, val) => (val in obj && (iter[val] = obj[val]), iter), {})
 
 export const sendFailure = (ctx, errMsg) => {
   ctx.body = {
     success: false,
-    message: errMsg
+    message: errMsg,
   }
 }
 

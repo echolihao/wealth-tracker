@@ -149,16 +149,11 @@ describe('getSecuritiesAccounts', () => {
 
 describe('getPositions', () => {
   it('should return positions for an asset id', async () => {
-    const positions = [
-      { asset_id: 1, security_symbol: 'AAPL' },
-    ]
+    const positions = [{ asset_id: 1, security_symbol: 'AAPL' }]
     mockPositionFindAll.mockResolvedValue(positions)
     const reply = mockReply()
 
-    await tradesCtrl.getPositions(
-      { params: { id: 1 } } as any,
-      reply,
-    )
+    await tradesCtrl.getPositions({ params: { id: 1 } } as any, reply)
 
     expect(mockPositionFindAll).toHaveBeenCalledWith({
       where: { asset_id: 1 },
@@ -171,10 +166,7 @@ describe('getPositions', () => {
     mockPositionFindAll.mockRejectedValue(new Error('Query failed'))
     const reply = mockReply()
 
-    await tradesCtrl.getPositions(
-      { params: { id: 1 } } as any,
-      reply,
-    )
+    await tradesCtrl.getPositions({ params: { id: 1 } } as any, reply)
 
     expect(reply.code).toHaveBeenCalledWith(400)
   })
@@ -262,10 +254,7 @@ describe('updatePositionPrice', () => {
 
 describe('getTrades', () => {
   it('should return paginated trades (query params are strings)', async () => {
-    const rows = [
-      makeTradeInstance({ id: 1 }),
-      makeTradeInstance({ id: 2 }),
-    ]
+    const rows = [makeTradeInstance({ id: 1 }), makeTradeInstance({ id: 2 })]
     mockTradeFindAndCountAll.mockResolvedValue({ count: 20, rows })
     const reply = mockReply()
 
@@ -280,7 +269,10 @@ describe('getTrades', () => {
     // query params arrive as strings; controller passes them directly
     expect(mockTradeFindAndCountAll).toHaveBeenCalledWith({
       where: { asset_id: 1 },
-      order: [['trade_date', 'DESC'], ['created', 'DESC']],
+      order: [
+        ['trade_date', 'DESC'],
+        ['created', 'DESC'],
+      ],
       offset: 5,
       limit: '5',
     })
@@ -313,10 +305,7 @@ describe('getTrades', () => {
     mockTradeFindAndCountAll.mockRejectedValue(new Error('Query error'))
     const reply = mockReply()
 
-    await tradesCtrl.getTrades(
-      { params: { id: 1 }, query: {} } as any,
-      reply,
-    )
+    await tradesCtrl.getTrades({ params: { id: 1 }, query: {} } as any, reply)
 
     expect(reply.code).toHaveBeenCalledWith(400)
   })
@@ -341,7 +330,10 @@ describe('getTrades', () => {
   })
 
   it('should filter by symbol parameter (like search)', async () => {
-    mockTradeFindAndCountAll.mockResolvedValue({ count: 1, rows: [{ id: 1, security_symbol: 'AAPL' }] })
+    mockTradeFindAndCountAll.mockResolvedValue({
+      count: 1,
+      rows: [{ id: 1, security_symbol: 'AAPL' }],
+    })
     const reply = mockReply()
 
     await tradesCtrl.getTrades(
@@ -688,10 +680,7 @@ describe('createTrade', () => {
       const reply = mockReply()
 
       // amount=1590, qty=10, price=160 → qty×price=1600, 偏差-10（实际卖出均价更低）
-      await tradesCtrl.createTrade(
-        makeRequest({ type: 'SELL', amount: 1590 }) as any,
-        reply,
-      )
+      await tradesCtrl.createTrade(makeRequest({ type: 'SELL', amount: 1590 }) as any, reply)
 
       // realizedPnl = (1590 - 0) - 140*10 = 1590 - 1400 = 190
       expect(mockTradeCreate).toHaveBeenCalledWith(
@@ -1098,9 +1087,7 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
   it('should throw when reversing BUY would make quantity negative', async () => {
     const existingPos = makePositionInstance({ quantity: 3 })
 
-    mockTradeFindByPk.mockResolvedValue(
-      makeTradeInstance({ type: 'BUY', quantity: 10 }),
-    )
+    mockTradeFindByPk.mockResolvedValue(makeTradeInstance({ type: 'BUY', quantity: 10 }))
     mockPositionFindOne.mockResolvedValue(existingPos)
     const reply = mockReply()
 
@@ -1150,9 +1137,7 @@ describe('reverseTradeEffect (via deleteTrade)', () => {
       makeTradeInstance({ type: 'SELL', quantity: 10, price: 160, realized_pnl: 100 }),
     )
     mockPositionFindOne.mockResolvedValue(null)
-    mockPositionCreate.mockResolvedValue(
-      makePositionInstance({ quantity: 10 }),
-    )
+    mockPositionCreate.mockResolvedValue(makePositionInstance({ quantity: 10 }))
     const reply = mockReply()
 
     await tradesCtrl.deleteTrade({ params: { id: '1' } } as any, reply)

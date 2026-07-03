@@ -42,13 +42,10 @@ export const resolveRuntimeOptions = (
 ): ResolvedServerRuntimeOptions => {
   return {
     host: options.host || process.env.HOST || DEFAULT_HOST,
-    port:
-      options.port ??
-      (process.env.PORT ? parseInt(process.env.PORT, 10) : DEFAULT_PORT),
+    port: options.port ?? (process.env.PORT ? parseInt(process.env.PORT, 10) : DEFAULT_PORT),
     publicDir: options.publicDir || process.env.PUBLIC_DIR || getPublicDir(),
     dbPath: options.dbPath || process.env.SQLITE_DB_PATH || getSqliteDbPath(),
-    allowPassword:
-      options.allowPassword ?? parseBooleanEnv(process.env.ALLOW_PASSWORD, false),
+    allowPassword: options.allowPassword ?? parseBooleanEnv(process.env.ALLOW_PASSWORD, false),
     canBeReset: options.canBeReset ?? parseBooleanEnv(process.env.CAN_BE_RESET, false),
   }
 }

@@ -65,7 +65,21 @@ export const createCustomCurrency = async (request: FastifyRequest, reply: Fasti
     }
 
     // 检查是否与系统货币冲突
-    const systemCurrencies = ['CNY', 'USD', 'HKD', 'BTC', 'EUR', 'JPY', 'GBP', 'TWD', 'KRW', 'AUD', 'CAD', 'SGD', 'CHF']
+    const systemCurrencies = [
+      'CNY',
+      'USD',
+      'HKD',
+      'BTC',
+      'EUR',
+      'JPY',
+      'GBP',
+      'TWD',
+      'KRW',
+      'AUD',
+      'CAD',
+      'SGD',
+      'CHF',
+    ]
     if (systemCurrencies.includes(code.toUpperCase())) {
       return reply.code(400).send({
         success: false,
@@ -124,7 +138,21 @@ export const updateCustomCurrency = async (request: FastifyRequest, reply: Fasti
         })
       }
 
-      const systemCurrencies = ['CNY', 'USD', 'HKD', 'BTC', 'EUR', 'JPY', 'GBP', 'TWD', 'KRW', 'AUD', 'CAD', 'SGD', 'CHF']
+      const systemCurrencies = [
+        'CNY',
+        'USD',
+        'HKD',
+        'BTC',
+        'EUR',
+        'JPY',
+        'GBP',
+        'TWD',
+        'KRW',
+        'AUD',
+        'CAD',
+        'SGD',
+        'CHF',
+      ]
       if (systemCurrencies.includes(code.toUpperCase())) {
         return reply.code(400).send({
           success: false,
@@ -179,4 +207,3 @@ export const deleteCustomCurrency = async (request: FastifyRequest, reply: Fasti
     })
   }
 }
-

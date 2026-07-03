@@ -71,5 +71,8 @@
     "Fastify",
     "SQLite3",
     "Sequelize"
-  ]
+  ],
+  "dependencies": {
+    "prettier-plugin-svelte": "^4.1.1"
+  }
 }

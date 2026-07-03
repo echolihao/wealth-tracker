@@ -420,7 +420,9 @@
                       <span
                         class:text-red-600={Number(trade.realized_pnl) >= 0}
                         class:text-green-600={Number(trade.realized_pnl) < 0}>
-                        {Number(trade.realized_pnl) >= 0 ? '+' : ''}{formatIntAmount(trade.realized_pnl)}
+                        {Number(trade.realized_pnl) >= 0 ? '+' : ''}{formatIntAmount(
+                          trade.realized_pnl,
+                        )}
                       </span>
                     {:else}
                       —
