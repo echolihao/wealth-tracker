@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
+  import { fade } from 'svelte/transition'
   import { _ } from 'svelte-i18n'
   import { Pagination, Table } from 'flowbite-svelte'
   import SvgIcon from './SvgIcon.svelte'
@@ -383,6 +384,7 @@
 {#if showDeleteConfirm}
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+    transition:fade={{ duration: 150 }}
     on:click={() => (showDeleteConfirm = false)}>
     <div class="mx-4 w-full max-w-sm rounded-lg bg-white p-6 shadow-xl" on:click|stopPropagation>
       <div class="mb-4 flex items-center gap-2">
@@ -412,6 +414,7 @@
 {#if showDetail && detailTarget}
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+    transition:fade={{ duration: 150 }}
     on:click={() => (showDetail = false)}>
     <div class="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl" on:click|stopPropagation>
       <div class="mb-4 flex items-center justify-between border-b pb-3">

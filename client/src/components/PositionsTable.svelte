@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
+  import { fade, scale } from 'svelte/transition'
   import { _ } from 'svelte-i18n'
   import { Table } from 'flowbite-svelte'
   import SvgIcon from './SvgIcon.svelte'
@@ -355,10 +356,12 @@
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
     role="dialog"
+    transition:fade={{ duration: 150 }}
     on:click={() => (showTradesModal = false)}>
     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <div
       class="mx-4 flex max-h-[80vh] w-full max-w-2xl flex-col rounded-lg bg-white shadow-xl"
+      transition:scale={{ duration: 150, start: 0.95 }}
       on:click|stopPropagation>
       <div class="flex items-center justify-between border-b px-6 py-4">
         <h3 class="text-base font-semibold">
