@@ -16,6 +16,41 @@ const ensureDatabaseDirectory = async (dbPath: string) => {
   await fs.mkdir(path.dirname(dbPath), { recursive: true })
 }
 
+const addColumnIfNotExists = async (table: string, column: string, def: string) => {
+  if (!sequelize) return
+  try {
+    const [info] = await sequelize.query(`PRAGMA table_info('${table}')`)
+    const columns = (info as any[]).map((c: any) => c.name)
+    if (!columns.includes(column)) {
+      await sequelize.query(`ALTER TABLE "${table}" ADD COLUMN ${column} ${def}`)
+      console.log(`  → Added column "${column}" to "${table}"`)
+    }
+  } catch (err) {
+    console.error(`  → Error adding column "${column}" to "${table}":`, err)
+  }
+}
+
+// Convert legacy kind=LIABILITY rows (positive amount) back to negative amounts.
+const migrateKindToSignBasedAmounts = async () => {
+  if (!sequelize) return
+  for (const table of ['assets', 'record']) {
+    try {
+      const [info] = await sequelize.query(`PRAGMA table_info('${table}')`)
+      const columns = (info as any[]).map((c: any) => c.name)
+      if (!columns.includes('kind')) continue
+      const [result] = await sequelize.query(
+        `UPDATE ${table} SET amount = -ABS(amount) WHERE kind = 'LIABILITY' AND amount > 0`,
+      )
+      const changes = (result as { changes?: number }).changes ?? 0
+      if (changes > 0) {
+        console.log(`  → Migrated ${changes} legacy liability rows in ${table} to negative amounts`)
+      }
+    } catch (err) {
+      console.error(`  → Error migrating legacy liability rows in ${table}:`, err)
+    }
+  }
+}
+
 const connectToSqlite = async () => {
   if (!sequelize) {
     throw new Error('Sequelize has not been initialized.')
@@ -24,28 +59,19 @@ const connectToSqlite = async () => {
   try {
     await ensureDatabaseDirectory(getRuntimeOptions().dbPath)
 
-    // 重建 assets / record / position / trade 四表（按外键依赖顺序 DROP）
-    const tablesToRebuild = ['trades', 'positions', 'record', 'assets']
-    for (const table of tablesToRebuild) {
-      await sequelize.query(`DROP TABLE IF EXISTS "${table}"`)
-    }
-
+    // sequelize.sync() 创建不存在的表，但不会修改已有表结构
     await sequelize.sync()
 
-    const db = sequelize
     // 向后兼容迁移：新增列（SQLite 不支持 DROP COLUMN 或 ALTER 大部分操作）
-    const addColumnIfNotExists = async (table: string, column: string, def: string) => {
-      const [info] = await db.query(`PRAGMA table_info('${table}')`)
-      const columns = (info as any[]).map((c: any) => c.name)
-      if (!columns.includes(column)) {
-        await db.query(`ALTER TABLE "${table}" ADD COLUMN ${column} ${def}`)
-        console.log(`  → Added column "${column}" to "${table}"`)
-      }
-    }
+    await addColumnIfNotExists('assets', 'tags', "TEXT DEFAULT ''")
+    await addColumnIfNotExists('record', 'tags', "TEXT DEFAULT ''")
     await addColumnIfNotExists('positions', 'open_date', 'DATE')
     await addColumnIfNotExists('positions', 'close_date', 'DATE')
+    await addColumnIfNotExists('positions', 'realized_pnl', 'DECIMAL(14,2) NOT NULL DEFAULT 0')
     await addColumnIfNotExists('trades', 'fee', 'DECIMAL(14,2) NOT NULL DEFAULT 0')
     await addColumnIfNotExists('trades', 'position_id', 'INTEGER')
+    await addColumnIfNotExists('trades', 'realized_pnl', 'DECIMAL(14,2)')
+    await migrateKindToSignBasedAmounts()
 
     console.log('🎊 Database synced!')
   } catch (err) {
