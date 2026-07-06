@@ -150,7 +150,7 @@
         {$_('quantity')}
         <i class="text-mark">*</i>
       </label>
-      <input type="number" step="1" class="custom-input" bind:value={quantity} placeholder="100" />
+      <input type="number" step="0.01" class="custom-input" bind:value={quantity} placeholder="100" />
     </div>
     <div class="module-warp">
       <label class="custom-label">
