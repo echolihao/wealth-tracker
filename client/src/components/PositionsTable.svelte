@@ -184,7 +184,9 @@
           <tr class="hover:bg-gray-50">
             <td class="text-xs text-gray-400 font-mono">{position.id}</td>
             <td class="font-mono text-sm">{position.security_symbol}</td>
-            <td>{position.security_name}</td>
+            <td class="max-w-[120px] truncate" title={position.security_name}>
+              {position.security_name}
+            </td>
             <td class="text-right">{formatQty(position.quantity)}</td>
             <td class="text-right font-mono text-sm">
               <div>{formatPrice(position.cost_price)}</div>
@@ -300,7 +302,9 @@
               <tr class="text-gray-400">
                 <td class="text-xs text-gray-400 font-mono">{position.id}</td>
                 <td class="font-mono text-sm">{position.security_symbol}</td>
-                <td>{position.security_name}</td>
+                <td class="max-w-[120px] truncate" title={position.security_name}>
+                  {position.security_name}
+                </td>
                 <td class="text-center text-sm">{formatDate(position.open_date)}</td>
                 <td class="text-center text-sm">{formatDate(position.close_date)}</td>
                 <td class="text-center text-sm">{getHoldingDays(position)}</td>
