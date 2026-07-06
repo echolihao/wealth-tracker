@@ -294,7 +294,9 @@
               </span>
             </td>
             <td class="font-mono text-sm">{trade.security_symbol}</td>
-            <td>{trade.security_name}</td>
+            <td class="max-w-[120px] truncate" title={trade.security_name}>
+              {trade.security_name}
+            </td>
             <td class="text-right font-mono text-sm">
               {Number(trade.quantity).toLocaleString()}
             </td>
