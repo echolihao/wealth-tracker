@@ -67,7 +67,7 @@
         <button
           on:click={() => handleSelect(account)}
           class="focus-visible-ring rounded-lg border px-4 py-3 text-left transition-all
-          {selectedAccount?.type === account.type
+          {selectedAccount?.id === account.id
             ? 'border-brand bg-brand/5 shadow-sm'
             : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}">
           <div class="flex items-center gap-3">
